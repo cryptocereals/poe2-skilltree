@@ -32,6 +32,7 @@ interface Props {
   alloc: Map<string, Tag>;
   ascAlloc: Set<string>;
   mode: Tag;
+  notedKeys: Set<string>;
   focusTarget: FocusTarget | null;
   onHover: (node: TreeNode | null, clientX: number, clientY: number) => void;
   onPick: (node: TreeNode | null) => void;
@@ -162,6 +163,7 @@ function TreeCanvas(props: Props) {
           ascOffset: p.ascOffset,
           previewKeys: previewRef.current?.keys ?? EMPTY_KEYS,
           previewTag: previewRef.current?.tag ?? 0,
+          notedKeys: p.notedKeys,
           time: t,
         };
         renderTree(ctx, cam, p.tree, p.atlases, ro);

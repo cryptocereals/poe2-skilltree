@@ -328,19 +328,27 @@ export default function App() {
     return n;
   }, [tree, ascAlloc]);
 
-  // allocated notables / keystones that can carry a note
+  // allocated notables / keystones that can carry a note (asc flag for tabs)
   const notesNodes = useMemo(() => {
-    if (!tree) return [] as { key: string; name: string }[];
-    const out: { key: string; name: string }[] = [];
+    if (!tree) return [] as { key: string; name: string; asc: boolean }[];
+    const out: { key: string; name: string; asc: boolean }[] = [];
     const add = (k: string) => {
       const n = tree.nodes.get(k);
       if (n && n.name && (n.kind === "notable" || n.kind === "keystone" || n.kind === "ascNotable"))
-        out.push({ key: k, name: n.name });
+        out.push({ key: k, name: n.name, asc: n.kind === "ascNotable" });
     };
     alloc.forEach((_t, k) => add(k));
     ascAlloc.forEach(add);
     return out;
   }, [tree, alloc, ascAlloc]);
+
+  // node keys with a non-empty note (shown as a badge in the tree, planner only)
+  const notedKeys = useMemo(() => {
+    const s = new Set<string>();
+    if (!planner) return s;
+    for (const [k, v] of Object.entries(doc.notes)) if (v.trim()) s.add(k);
+    return s;
+  }, [planner, doc.notes]);
 
   const ascPrefixForClass =
     selectedClass != null && tree ? tree.classes[selectedClass].name : null;
@@ -390,6 +398,7 @@ export default function App() {
         alloc={alloc}
         ascAlloc={ascAlloc}
         mode={mode}
+        notedKeys={notedKeys}
         focusTarget={focusTarget}
         onHover={onHover}
         onPick={handleNodeClick}
@@ -417,6 +426,7 @@ export default function App() {
               newAscIds={newAscIds}
               onSelectClass={selectClass}
               onSelectAsc={selectAsc}
+              onNext={() => goToStep(1)}
             />
           )}
           {step === 1 && (

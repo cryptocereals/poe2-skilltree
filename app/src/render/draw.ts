@@ -87,6 +87,7 @@ export interface RenderOpts {
   ascOffset: { dx: number; dy: number } | null; // shifts the selected ascendancy to centre
   previewKeys: Set<string>; // path a hovered node would allocate
   previewTag: 0 | 1 | 2;
+  notedKeys: Set<string>; // nodes that have a planner note → show a badge
   time: number;
 }
 
@@ -251,6 +252,8 @@ export function renderTree(
   type Single = { x: number; y: number; r: number };
   let focusRing: Single | null = null;
   let hoverRing: Single | null = null;
+  const hasNotes = opts.notedKeys.size > 0;
+  const noteBadges: { x: number; y: number; nr: number }[] = [];
 
   const frameW = (key: string) => (set.frame.frames[key]?.w ?? 100) / set.frame.scale;
 
@@ -336,6 +339,7 @@ export function renderTree(
     }
     if (opts.focusKey === n.key) focusRing = { x: px, y: py, r: ringR * 1.3 };
     else if (opts.hoverKey === n.key) hoverRing = { x: px, y: py, r: ringR * 1.1 };
+    if (hasNotes && opts.notedKeys.has(n.key)) noteBadges.push({ x: px, y: py, nr: natural * 0.5 });
   }
 
   // draw dot buckets
@@ -385,6 +389,31 @@ export function renderTree(
     ctx.arc(focusRing.x, focusRing.y, focusRing.r, 0, Math.PI * 2);
     ctx.stroke();
     ctx.restore();
+  }
+
+  // note badges (constant screen size, parked at each noted node's upper-right)
+  if (noteBadges.length) {
+    const r = cssPx(7);
+    const lw = cssPx(1.3);
+    for (const b of noteBadges) {
+      const ox = b.x + b.nr * 0.7;
+      const oy = b.y - b.nr * 0.7;
+      ctx.fillStyle = "#f1d6a0";
+      ctx.beginPath();
+      ctx.arc(ox, oy, r, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = "#1a140a";
+      ctx.lineWidth = lw;
+      ctx.lineCap = "round";
+      ctx.beginPath();
+      ctx.moveTo(ox - r * 0.42, oy - r * 0.3);
+      ctx.lineTo(ox + r * 0.42, oy - r * 0.3);
+      ctx.moveTo(ox - r * 0.42, oy + r * 0.04);
+      ctx.lineTo(ox + r * 0.42, oy + r * 0.04);
+      ctx.moveTo(ox - r * 0.42, oy + r * 0.38);
+      ctx.lineTo(ox + r * 0.1, oy + r * 0.38);
+      ctx.stroke();
+    }
   }
 
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);

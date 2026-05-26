@@ -1179,6 +1179,102 @@ body {
   line-height: 1.4;
   color: var(--ink);
 }
+textarea.note-item__input {
+  resize: vertical;
+  min-height: 36px;
+}
+.notes-tabs {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+.notes-tabs button {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--line-soft);
+  border-radius: 3px;
+  color: var(--ink-dim);
+  font-family: var(--font-display);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 6px;
+  cursor: pointer;
+}
+.notes-tabs button.active {
+  color: var(--gold-bright);
+  border-color: var(--gold);
+  background: rgba(200, 163, 90, 0.12);
+}
+.notes-tabs__n {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--ink-faint);
+}
+.note-tools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 10px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--line-soft);
+}
+.note-tools button {
+  width: 24px;
+  height: 24px;
+  display: grid;
+  place-content: center;
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid var(--line-soft);
+  border-radius: 3px;
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 13px;
+  cursor: pointer;
+}
+.note-tools button:hover {
+  border-color: var(--gold);
+}
+.note-tools__sep {
+  width: 1px;
+  height: 18px;
+  background: var(--line-soft);
+  margin: 0 3px;
+}
+.note-swatch {
+  width: 18px !important;
+  height: 18px !important;
+  border: 1px solid rgba(0, 0, 0, 0.4) !important;
+  padding: 0;
+}
+
+.step__next {
+  margin-top: 18px;
+  width: 100%;
+  background: linear-gradient(180deg, var(--gold-bright), var(--gold));
+  border: none;
+  border-radius: 3px;
+  color: var(--void);
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 11px;
+  cursor: pointer;
+}
+.step__next:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+.step__next:not(:disabled):hover {
+  box-shadow: 0 0 18px rgba(200, 163, 90, 0.45);
+}
 
 /* ---- Edge toggles (mobile) ---------------------------------------------- */
 
