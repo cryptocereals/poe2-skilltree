@@ -147,19 +147,23 @@ export async function loadTree(version: string, onProgress?: ProgressFn): Promis
     }
   }
 
-  // Ascendancy background art: one tile per ascendancy, indexed by its position
-  // within the class (class<Name>:Class<i> in the background-<name> atlas),
-  // centred on the cluster's bounding box.
+  // Ascendancy background art, centred on each cluster's bounding box. The
+  // atlas frame class<Name>:Class<N> matches the ascendancy whose id ends in N
+  // (Witch1→Class1 … Witch3→Class3, verified across every class); the lettered
+  // variant (Witch3b / Abyssal Lich) uses the spare Class0 slot. Unreleased
+  // ascendancies (no name) are skipped.
   const ascBackgrounds: AscBackground[] = [];
   raw.classes.forEach((c) => {
     c.ascendancies.forEach((a, i) => {
-      if (!a || !a.id) return;
+      if (!a || !a.id || !a.name) return;
       const b = ascBox.get(a.id);
       if (!b) return;
+      const m = a.id.match(/(\d+)([a-z]*)$/i);
+      const frameNum = m ? (m[2] ? 0 : parseInt(m[1], 10)) : i + 1;
       ascBackgrounds.push({
         ascId: a.id,
         cls: c.name.toLowerCase(),
-        frame: `class${c.name}:Class${i}`,
+        frame: `class${c.name}:Class${frameNum}`,
         cx: (b.minX + b.maxX) / 2,
         cy: (b.minY + b.maxY) / 2,
       });
