@@ -1,17 +1,14 @@
-import { memo, useRef } from "react";
+import { memo } from "react";
 
 interface Props {
   steps: string[];
   step: number;
   setStep: (s: number) => void;
-  onImport: (file: File) => void;
   onExport: () => void;
   onExit: () => void;
 }
 
-function PlannerWizard({ steps, step, setStep, onImport, onExport, onExit }: Props) {
-  const fileRef = useRef<HTMLInputElement>(null);
-
+function PlannerWizard({ steps, step, setStep, onExport, onExit }: Props) {
   return (
     <div className="panel wizard">
       <button className="wizard__exit" onClick={onExit} title="Exit planner">
@@ -47,23 +44,9 @@ function PlannerWizard({ steps, step, setStep, onImport, onExport, onExit }: Pro
       </div>
 
       <div className="wizard__io">
-        <button className="wizard__btn ghost" onClick={() => fileRef.current?.click()}>
-          Import
-        </button>
         <button className="wizard__btn ghost" onClick={onExport}>
           Export
         </button>
-        <input
-          ref={fileRef}
-          type="file"
-          accept=".build,application/json"
-          style={{ display: "none" }}
-          onChange={(e) => {
-            const f = e.target.files?.[0];
-            if (f) onImport(f);
-            e.target.value = "";
-          }}
-        />
       </div>
     </div>
   );

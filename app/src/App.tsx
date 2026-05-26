@@ -33,6 +33,7 @@ const WIZARD_STEPS = ["Details", "Passives", "Skills", "Inventory"];
 export default function App() {
   const cameraRef = useRef(new Camera());
   const hoverRef = useRef<HoverHandle>(null);
+  const importRef = useRef<HTMLInputElement>(null);
   const trees = useRef<Record<Version, ParsedTree> | null>(null);
   const prog = useRef<Record<string, { l: number; t: number }>>({});
   const nonce = useRef(0);
@@ -221,6 +222,14 @@ export default function App() {
 
   const exitPlanner = useCallback(() => setPlanner(false), []);
 
+  // Edit an already-loaded build (e.g. just imported) in the planner wizard.
+  const editBuild = useCallback(() => {
+    setStep(0);
+    setPlanner(true);
+  }, []);
+
+  const triggerImport = useCallback(() => importRef.current?.click(), []);
+
   // Entering the Passives step: focus the class start so allocation can begin.
   const goToStep = useCallback(
     (s: number) => {
@@ -265,13 +274,16 @@ export default function App() {
           ascAlloc: parsed.ascAlloc,
         });
         setDoc(parsed.doc);
-        setPlanner(true);
-        setStep(0);
+        // Stay in the explorer to view the imported build; the "Edit" button
+        // (in the class panel) enters the planner to modify it.
+        const start = parsed.selectedClass != null ? t.classStart.get(parsed.selectedClass) : null;
+        if (start) goTo(start.x, start.y, 0.3);
+        else resetView();
       } catch (e) {
         alert("Could not read that .build file: " + (e as Error).message);
       }
     },
-    [version]
+    [version, goTo, resetView]
   );
 
   // ---- derived ----
@@ -342,13 +354,14 @@ export default function App() {
     return out;
   }, [tree, alloc, ascAlloc]);
 
-  // node keys with a non-empty note (shown as a badge in the tree, planner only)
+  // node keys with a non-empty note → show a badge in the tree. Shown in both
+  // planner and explorer (e.g. after importing a build that carries notes);
+  // doc.notes is empty while plainly browsing, so this is a no-op then.
   const notedKeys = useMemo(() => {
     const s = new Set<string>();
-    if (!planner) return s;
     for (const [k, v] of Object.entries(doc.notes)) if (v.trim()) s.add(k);
     return s;
-  }, [planner, doc.notes]);
+  }, [doc.notes]);
 
   const ascPrefixForClass =
     selectedClass != null && tree ? tree.classes[selectedClass].name : null;
@@ -410,7 +423,6 @@ export default function App() {
             steps={WIZARD_STEPS}
             step={step}
             setStep={goToStep}
-            onImport={onImport}
             onExport={onExport}
             onExit={exitPlanner}
           />
@@ -426,7 +438,6 @@ export default function App() {
               newAscIds={newAscIds}
               onSelectClass={selectClass}
               onSelectAsc={selectAsc}
-              onNext={() => goToStep(1)}
             />
           )}
           {step === 1 && (
@@ -499,7 +510,6 @@ export default function App() {
             setMode={setMode}
             setBaseBudget={setBaseBudget}
             onClear={clearBuild}
-            onPlanner={enterPlanner}
           />
           <ClassPanel
             classes={tree.classes}
@@ -508,6 +518,21 @@ export default function App() {
             newAscIds={newAscIds}
             onSelectClass={selectClass}
             onSelectAsc={selectAsc}
+            onNewBuild={enterPlanner}
+            onImport={triggerImport}
+            onEdit={editBuild}
+            canEdit={selectedClass != null || alloc.size > 0}
+          />
+          <input
+            ref={importRef}
+            type="file"
+            accept=".build,application/json"
+            style={{ display: "none" }}
+            onChange={(e) => {
+              const f = e.target.files?.[0];
+              if (f) onImport(f);
+              e.target.value = "";
+            }}
           />
           <button
             className="edge-toggle left"

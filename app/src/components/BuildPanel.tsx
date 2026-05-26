@@ -15,7 +15,6 @@ interface Props {
   setMode: (m: Tag) => void;
   setBaseBudget: (n: number) => void;
   onClear: () => void;
-  onPlanner?: () => void;
 }
 
 function BuildPanel({
@@ -32,7 +31,6 @@ function BuildPanel({
   setMode,
   setBaseBudget,
   onClear,
-  onPlanner,
 }: Props) {
   return (
     <div className="panel build">
@@ -107,12 +105,6 @@ function BuildPanel({
           <path d="M3 3v5h5" />
         </svg>
       </button>
-
-      {onPlanner && (
-        <button className="build__planner" onClick={onPlanner} title="Create a build (.build export)">
-          ✦ New Build
-        </button>
-      )}
     </div>
   );
 }

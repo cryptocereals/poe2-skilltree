@@ -9,6 +9,10 @@ interface Props {
   newAscIds: Set<string>;
   onSelectClass: (idx: number | null) => void;
   onSelectAsc: (id: string | null) => void;
+  onNewBuild: () => void;
+  onImport: () => void;
+  onEdit: () => void;
+  canEdit: boolean;
 }
 
 const isPlayable = (c: ClassInfo) => c.ascendancies.some((a) => a && a.name);
@@ -20,6 +24,10 @@ function ClassPanel({
   newAscIds,
   onSelectClass,
   onSelectAsc,
+  onNewBuild,
+  onImport,
+  onEdit,
+  canEdit,
 }: Props) {
   const cls = selectedClass != null ? classes[selectedClass] : null;
   const ascendancies = cls ? cls.ascendancies.filter((a) => a && a.name) : [];
@@ -31,6 +39,19 @@ function ClassPanel({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay: 0.2 }}
     >
+      <div className="class-actions">
+        <button className="ca-btn primary" onClick={onNewBuild}>
+          ✦ New Build
+        </button>
+        <button className="ca-btn" onClick={onImport}>
+          Import
+        </button>
+        {canEdit && (
+          <button className="ca-btn edit" onClick={onEdit}>
+            Edit ✎
+          </button>
+        )}
+      </div>
       <div className="panel__title">Class · Ascendancy</div>
       <div className="class-grid">
         {classes.map((c, i) =>

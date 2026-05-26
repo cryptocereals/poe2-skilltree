@@ -12,7 +12,6 @@ interface Props {
   newAscIds: Set<string>;
   onSelectClass: (idx: number | null) => void;
   onSelectAsc: (id: string | null) => void;
-  onNext: () => void;
 }
 
 const isPlayable = (c: ClassInfo) => c.ascendancies.some((a) => a && a.name);
@@ -28,7 +27,6 @@ function DetailsStep({
   newAscIds,
   onSelectClass,
   onSelectAsc,
-  onNext,
 }: Props) {
   const cls = selectedClass != null ? classes[selectedClass] : null;
   const ascendancies = cls ? cls.ascendancies.filter((a) => a && a.name) : [];
@@ -90,10 +88,6 @@ function DetailsStep({
           ))}
         </div>
       )}
-
-      <button className="step__next" onClick={onNext} disabled={selectedClass == null}>
-        Next: Allocate Passives →
-      </button>
     </div>
   );
 }
