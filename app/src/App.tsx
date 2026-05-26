@@ -12,8 +12,22 @@ import VersionPanel from "./components/VersionPanel";
 import BuildPanel from "./components/BuildPanel";
 import Controls from "./components/Controls";
 import HoverLayer, { type HoverHandle } from "./components/HoverLayer";
+import PlannerWizard from "./components/PlannerWizard";
+import DetailsStep from "./components/steps/DetailsStep";
+import InventoryStep from "./components/steps/InventoryStep";
+import SkillsStep from "./components/steps/SkillsStep";
+import {
+  exportBuild,
+  parseBuildFile,
+  downloadBuild,
+  emptyDoc,
+  type PlannerDoc,
+  type BuildInventorySlot,
+  type BuildSkill,
+} from "./lib/buildFile";
 
 type Version = "0.5" | "0.4";
+const WIZARD_STEPS = ["Details", "Passives", "Skills", "Inventory"];
 
 export default function App() {
   const cameraRef = useRef(new Camera());
@@ -41,6 +55,11 @@ export default function App() {
   // purely CSS-media-driven (no reliance on JS innerWidth).
   const [showLeft, setShowLeft] = useState(false);
   const [showRight, setShowRight] = useState(false);
+
+  // planner mode (build wizard)
+  const [planner, setPlanner] = useState(false);
+  const [step, setStep] = useState(0);
+  const [doc, setDoc] = useState<PlannerDoc>(emptyDoc());
 
   // all selection + build-planner state in one reducer
   const [build, dispatch] = useReducer(buildReducer, initialBuild);
@@ -191,6 +210,51 @@ export default function App() {
     return () => window.removeEventListener("keydown", onKey);
   }, []);
 
+  // ---- planner ----
+  const enterPlanner = useCallback(() => {
+    dispatch({ type: "load", selectedClass: null, selectedAsc: null, alloc: new Map(), ascAlloc: new Set() });
+    setDoc(emptyDoc());
+    setStep(0);
+    setPlanner(true);
+  }, []);
+
+  const exitPlanner = useCallback(() => setPlanner(false), []);
+
+  const setDocField = useCallback((field: "name" | "author" | "description", value: string) => {
+    setDoc((d) => ({ ...d, [field]: value }));
+  }, []);
+  const setInventory = useCallback((inv: BuildInventorySlot[]) => setDoc((d) => ({ ...d, inventory: inv })), []);
+  const setSkills = useCallback((sk: BuildSkill[]) => setDoc((d) => ({ ...d, skills: sk })), []);
+
+  const onExport = useCallback(() => {
+    const t = trees.current?.[version];
+    if (!t) return;
+    downloadBuild(exportBuild(t, alloc, ascAlloc, selectedAsc, doc));
+  }, [version, alloc, ascAlloc, selectedAsc, doc]);
+
+  const onImport = useCallback(
+    async (file: File) => {
+      const t = trees.current?.[version];
+      if (!t) return;
+      try {
+        const parsed = parseBuildFile(await file.text(), t);
+        dispatch({
+          type: "load",
+          selectedClass: parsed.selectedClass,
+          selectedAsc: parsed.selectedAsc,
+          alloc: parsed.alloc,
+          ascAlloc: parsed.ascAlloc,
+        });
+        setDoc(parsed.doc);
+        setPlanner(true);
+        setStep(0);
+      } catch (e) {
+        alert("Could not read that .build file: " + (e as Error).message);
+      }
+    },
+    [version]
+  );
+
   // ---- derived ----
   const startKey =
     selectedClass != null && tree ? tree.classStart.get(selectedClass)?.key ?? null : null;
@@ -261,7 +325,11 @@ export default function App() {
   }
 
   return (
-    <div className={"app" + (showLeft ? " show-left" : "") + (showRight ? " show-right" : "")}>
+    <div
+      className={
+        "app" + (showLeft ? " show-left" : "") + (showRight ? " show-right" : "") + (planner ? " planner" : "")
+      }
+    >
       <TreeCanvas
         tree={tree}
         atlases={atlases}
@@ -285,65 +353,123 @@ export default function App() {
         onPick={handleNodeClick}
       />
 
-      <SearchPanel
-        query={query}
-        setQuery={setQuery}
-        results={results}
-        total={results.length}
-        diff={diff}
-        diffOn={diffOn}
-        onPick={pickSearch}
-      />
-
-      <VersionPanel
-        version={version}
-        setVersion={setVersion}
-        diffOn={diffOn}
-        setDiffOn={toggleDiff}
-        diff={diff}
-      />
-
-      <BuildPanel
-        hasClass={selectedClass != null}
-        mainUsed={alloc.size}
-        budget={baseBudget + bonus}
-        bonus={bonus}
-        ascUsed={ascAlloc.size}
-        ascBudget={ASC_BUDGET}
-        mode={mode}
-        set1={setCounts[0]}
-        set2={setCounts[1]}
-        swapMax={SWAP_MAX}
-        setMode={setMode}
-        setBaseBudget={setBaseBudget}
-        onClear={clearBuild}
-      />
-
-      <ClassPanel
-        classes={tree.classes}
-        selectedClass={selectedClass}
-        selectedAsc={selectedAsc}
-        newAscIds={newAscIds}
-        onSelectClass={selectClass}
-        onSelectAsc={selectAsc}
-      />
+      {planner ? (
+        <>
+          <PlannerWizard
+            steps={WIZARD_STEPS}
+            step={step}
+            setStep={setStep}
+            onImport={onImport}
+            onExport={onExport}
+            onExit={exitPlanner}
+          />
+          {step === 0 && (
+            <DetailsStep
+              name={doc.name}
+              author={doc.author}
+              description={doc.description}
+              setField={setDocField}
+              classes={tree.classes}
+              selectedClass={selectedClass}
+              selectedAsc={selectedAsc}
+              newAscIds={newAscIds}
+              onSelectClass={selectClass}
+              onSelectAsc={selectAsc}
+            />
+          )}
+          {step === 1 && (
+            <>
+              <SearchPanel
+                query={query}
+                setQuery={setQuery}
+                results={results}
+                total={results.length}
+                diff={diff}
+                diffOn={diffOn}
+                onPick={pickSearch}
+              />
+              <BuildPanel
+                hasClass={selectedClass != null}
+                mainUsed={alloc.size}
+                budget={baseBudget + bonus}
+                bonus={bonus}
+                ascUsed={ascAlloc.size}
+                ascBudget={ASC_BUDGET}
+                mode={mode}
+                set1={setCounts[0]}
+                set2={setCounts[1]}
+                swapMax={SWAP_MAX}
+                setMode={setMode}
+                setBaseBudget={setBaseBudget}
+                onClear={clearBuild}
+              />
+            </>
+          )}
+          {step === 2 && <SkillsStep skills={doc.skills} setSkills={setSkills} version={version} />}
+          {step === 3 && (
+            <InventoryStep inventory={doc.inventory} setInventory={setInventory} version={version} />
+          )}
+        </>
+      ) : (
+        <>
+          <SearchPanel
+            query={query}
+            setQuery={setQuery}
+            results={results}
+            total={results.length}
+            diff={diff}
+            diffOn={diffOn}
+            onPick={pickSearch}
+          />
+          <VersionPanel
+            version={version}
+            setVersion={setVersion}
+            diffOn={diffOn}
+            setDiffOn={toggleDiff}
+            diff={diff}
+          />
+          <BuildPanel
+            hasClass={selectedClass != null}
+            mainUsed={alloc.size}
+            budget={baseBudget + bonus}
+            bonus={bonus}
+            ascUsed={ascAlloc.size}
+            ascBudget={ASC_BUDGET}
+            mode={mode}
+            set1={setCounts[0]}
+            set2={setCounts[1]}
+            swapMax={SWAP_MAX}
+            setMode={setMode}
+            setBaseBudget={setBaseBudget}
+            onClear={clearBuild}
+            onPlanner={enterPlanner}
+          />
+          <ClassPanel
+            classes={tree.classes}
+            selectedClass={selectedClass}
+            selectedAsc={selectedAsc}
+            newAscIds={newAscIds}
+            onSelectClass={selectClass}
+            onSelectAsc={selectAsc}
+          />
+          <button
+            className="edge-toggle left"
+            onClick={() => setShowLeft((v) => !v)}
+            aria-label="Toggle search and class panels"
+          >
+            {showLeft ? "‹" : "›"}
+          </button>
+          <button
+            className="edge-toggle right"
+            onClick={() => setShowRight((v) => !v)}
+            aria-label="Toggle version panel"
+          >
+            {showRight ? "›" : "‹"}
+          </button>
+        </>
+      )}
 
       <Controls camera={cameraRef.current} onReset={resetView} />
-
-      <button
-        className="edge-toggle left"
-        onClick={() => setShowLeft((v) => !v)}
-        aria-label="Toggle search and class panels"
-      >
-        {showLeft ? "‹" : "›"}
-      </button>
-      <button
-        className="edge-toggle right"
-        onClick={() => setShowRight((v) => !v)}
-        aria-label="Toggle version panel"
-      >
-        {showRight ? "›" : "‹"}
-      </button>
 
       <HoverLayer
         ref={hoverRef}

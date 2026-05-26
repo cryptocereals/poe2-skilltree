@@ -32,7 +32,14 @@ export type BuildAction =
   | { type: "clickNode"; node: TreeNode; tree: ParsedTree }
   | { type: "setMode"; mode: Tag }
   | { type: "setBudget"; n: number }
-  | { type: "clear" };
+  | { type: "clear" }
+  | {
+      type: "load";
+      selectedClass: number | null;
+      selectedAsc: string | null;
+      alloc: Map<string, Tag>;
+      ascAlloc: Set<string>;
+    };
 
 const tagCount = (alloc: Map<string, Tag>, tag: Tag) => {
   let n = 0;
@@ -110,6 +117,15 @@ export function buildReducer(s: BuildState, a: BuildAction): BuildState {
       return { ...s, baseBudget: a.n };
     case "clear":
       return { ...s, alloc: new Map(), ascAlloc: new Set() };
+    case "load":
+      return {
+        ...s,
+        selectedClass: a.selectedClass,
+        selectedAsc: a.selectedAsc,
+        mode: 0,
+        alloc: a.alloc,
+        ascAlloc: a.ascAlloc,
+      };
     case "clickNode": {
       const { node, tree } = a;
       const adj = tree.adjacency;

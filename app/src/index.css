@@ -793,6 +793,185 @@ body {
   padding: 2px 0;
 }
 
+/* ---- Build planner wizard ----------------------------------------------- */
+
+.build__planner {
+  background: linear-gradient(180deg, var(--gold-bright), var(--gold));
+  border: none;
+  border-radius: 3px;
+  color: var(--void);
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 7px 12px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.build__planner:hover {
+  box-shadow: 0 0 16px rgba(200, 163, 90, 0.5);
+}
+
+.wizard {
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 9px 12px 9px 14px;
+}
+.wizard__exit {
+  background: transparent;
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  color: var(--ink-dim);
+  width: 28px;
+  height: 28px;
+  cursor: pointer;
+}
+.wizard__exit:hover {
+  border-color: var(--removed);
+  color: var(--removed);
+}
+.wizard__steps {
+  display: flex;
+  gap: 6px;
+}
+.wizard__step {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--line-soft);
+  border-radius: 3px;
+  color: var(--ink-dim);
+  font-family: var(--font-display);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 6px 11px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.wizard__step.active {
+  color: var(--gold-bright);
+  border-color: var(--gold);
+  background: rgba(200, 163, 90, 0.12);
+}
+.wizard__step.done {
+  color: var(--ink);
+}
+.wizard__num {
+  display: grid;
+  place-content: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 1px solid currentColor;
+  font-size: 9px;
+  font-family: var(--font-mono);
+}
+.wizard__nav,
+.wizard__io {
+  display: flex;
+  gap: 6px;
+}
+.wizard__io {
+  border-left: 1px solid var(--line-soft);
+  padding-left: 12px;
+}
+.wizard__btn {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  color: var(--ink);
+  font-family: var(--font-display);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 7px 13px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.wizard__btn:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+.wizard__btn.primary {
+  background: linear-gradient(180deg, var(--gold-bright), var(--gold));
+  border-color: var(--gold-bright);
+  color: var(--void);
+  font-weight: 600;
+}
+.wizard__btn.ghost {
+  color: var(--ink-dim);
+}
+.wizard__btn:not(:disabled):hover {
+  border-color: var(--gold);
+}
+
+/* passives-step points bar sits below the wizard bar */
+.app.planner .build {
+  top: 82px;
+}
+
+/* step form panels (Details / Skills / Inventory) */
+.step {
+  top: 82px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(440px, 92vw);
+  max-height: calc(100vh - 110px);
+  overflow-y: auto;
+  padding: 18px 20px;
+}
+.step__title {
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 16px;
+}
+.step__hint {
+  font-size: 13px;
+  color: var(--ink-dim);
+  line-height: 1.5;
+}
+.field {
+  display: block;
+  margin-bottom: 12px;
+}
+.field__label {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+  margin-bottom: 5px;
+}
+.field input,
+.field textarea {
+  width: 100%;
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 14px;
+  padding: 8px 10px;
+  resize: vertical;
+}
+.field input:focus,
+.field textarea:focus {
+  outline: none;
+  border-color: var(--gold);
+}
+
 /* ---- Edge toggles (mobile) ---------------------------------------------- */
 
 .edge-toggle {
