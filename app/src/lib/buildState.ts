@@ -70,6 +70,15 @@ function supported(adj: Map<string, string[]>, alloc: Map<string, Tag>, start: s
  * unreachable, or would exceed a cap). Used for the hover preview and reused
  * by the reducer to stay consistent.
  */
+/** Ascendancy points spent — multiple-choice options are free. */
+function ascPoints(set: Set<string>, tree: ParsedTree): number {
+  let n = 0;
+  set.forEach((k) => {
+    if (!tree.nodes.get(k)?.mcOption) n++;
+  });
+  return n;
+}
+
 export function previewAllocation(
   tree: ParsedTree,
   st: Pick<BuildState, "selectedClass" | "selectedAsc" | "mode" | "alloc" | "ascAlloc">,
@@ -83,7 +92,9 @@ export function previewAllocation(
     if (!start || node.key === start.key || st.ascAlloc.has(node.key)) return null;
     const sources = new Set<string>([start.key, ...st.ascAlloc]);
     const path = pathFrom(adj, sources, node.key, (k) => tree.nodes.get(k)?.ascendancyId === node.ascendancyId);
-    if (!path || st.ascAlloc.size + path.length > ASC_BUDGET) return null;
+    if (!path) return null;
+    const addCost = path.reduce((n, k) => n + (tree.nodes.get(k)?.mcOption ? 0 : 1), 0);
+    if (ascPoints(st.ascAlloc, tree) + addCost > ASC_BUDGET) return null;
     return { keys: path, tag: 0 };
   }
 
@@ -144,9 +155,21 @@ export function buildReducer(s: BuildState, a: BuildAction): BuildState {
         }
         const sources = new Set<string>([start.key, ...cur]);
         const path = pathFrom(adj, sources, node.key, (k) => tree.nodes.get(k)?.ascendancyId === ascId);
-        if (!path || cur.size + path.length > ASC_BUDGET) return s;
+        if (!path) return s;
+        // multiple-choice options are free; only point-costing nodes hit the budget
+        const addCost = path.reduce((n, k) => n + (tree.nodes.get(k)?.mcOption ? 0 : 1), 0);
+        if (ascPoints(cur, tree) + addCost > ASC_BUDGET) return s;
         const next = new Set(cur);
         path.forEach((k) => next.add(k));
+        // enforce "pick one" per multiple-choice group for any option just added
+        for (const k of path) {
+          const n = tree.nodes.get(k);
+          if (!n?.mcOption || !n.mcParent) continue;
+          for (const other of [...next]) {
+            const on = tree.nodes.get(other);
+            if (other !== k && on?.mcOption && on.mcParent === n.mcParent) next.delete(other);
+          }
+        }
         return { ...s, ascAlloc: next };
       }
 

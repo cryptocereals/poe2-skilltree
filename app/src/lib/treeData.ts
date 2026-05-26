@@ -81,6 +81,8 @@ export async function loadTree(version: string, onProgress?: ProgressFn): Promis
       x: n.x,
       y: n.y,
       grantedPassivePoints: n.grantedPassivePoints,
+      mcOption: !!n.isMultipleChoiceOption,
+      mcParent: n.multipleChoiceParent != null ? String(n.multipleChoiceParent) : undefined,
     };
     nodes.set(key, tn);
     nodeList.push(tn);

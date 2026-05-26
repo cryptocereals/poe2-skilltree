@@ -13,6 +13,7 @@ import BuildPanel from "./components/BuildPanel";
 import Controls from "./components/Controls";
 import HoverLayer, { type HoverHandle } from "./components/HoverLayer";
 import PlannerWizard from "./components/PlannerWizard";
+import NotesPanel from "./components/NotesPanel";
 import DetailsStep from "./components/steps/DetailsStep";
 import InventoryStep from "./components/steps/InventoryStep";
 import SkillsStep from "./components/steps/SkillsStep";
@@ -220,11 +221,29 @@ export default function App() {
 
   const exitPlanner = useCallback(() => setPlanner(false), []);
 
+  // Entering the Passives step: focus the class start so allocation can begin.
+  const goToStep = useCallback(
+    (s: number) => {
+      setStep(s);
+      if (s === 1) {
+        const t = trees.current?.[version];
+        const start = selectedClass != null && t ? t.classStart.get(selectedClass) : null;
+        if (start) goTo(start.x, start.y, 0.42);
+        else resetView();
+      }
+    },
+    [version, selectedClass, goTo, resetView]
+  );
+
   const setDocField = useCallback((field: "name" | "author" | "description", value: string) => {
     setDoc((d) => ({ ...d, [field]: value }));
   }, []);
   const setInventory = useCallback((inv: BuildInventorySlot[]) => setDoc((d) => ({ ...d, inventory: inv })), []);
   const setSkills = useCallback((sk: BuildSkill[]) => setDoc((d) => ({ ...d, skills: sk })), []);
+  const setNote = useCallback(
+    (key: string, text: string) => setDoc((d) => ({ ...d, notes: { ...d.notes, [key]: text } })),
+    []
+  );
 
   const onExport = useCallback(() => {
     const t = trees.current?.[version];
@@ -300,6 +319,29 @@ export default function App() {
     return [a, b] as const;
   }, [alloc]);
 
+  const ascUsed = useMemo(() => {
+    if (!tree) return 0;
+    let n = 0;
+    ascAlloc.forEach((k) => {
+      if (!tree.nodes.get(k)?.mcOption) n++; // multiple-choice options are free
+    });
+    return n;
+  }, [tree, ascAlloc]);
+
+  // allocated notables / keystones that can carry a note
+  const notesNodes = useMemo(() => {
+    if (!tree) return [] as { key: string; name: string }[];
+    const out: { key: string; name: string }[] = [];
+    const add = (k: string) => {
+      const n = tree.nodes.get(k);
+      if (n && n.name && (n.kind === "notable" || n.kind === "keystone" || n.kind === "ascNotable"))
+        out.push({ key: k, name: n.name });
+    };
+    alloc.forEach((_t, k) => add(k));
+    ascAlloc.forEach(add);
+    return out;
+  }, [tree, alloc, ascAlloc]);
+
   const ascPrefixForClass =
     selectedClass != null && tree ? tree.classes[selectedClass].name : null;
   const activeOverrides =
@@ -358,7 +400,7 @@ export default function App() {
           <PlannerWizard
             steps={WIZARD_STEPS}
             step={step}
-            setStep={setStep}
+            setStep={goToStep}
             onImport={onImport}
             onExport={onExport}
             onExit={exitPlanner}
@@ -393,7 +435,7 @@ export default function App() {
                 mainUsed={alloc.size}
                 budget={baseBudget + bonus}
                 bonus={bonus}
-                ascUsed={ascAlloc.size}
+                ascUsed={ascUsed}
                 ascBudget={ASC_BUDGET}
                 mode={mode}
                 set1={setCounts[0]}
@@ -403,6 +445,7 @@ export default function App() {
                 setBaseBudget={setBaseBudget}
                 onClear={clearBuild}
               />
+              <NotesPanel nodes={notesNodes} notes={doc.notes} setNote={setNote} />
             </>
           )}
           {step === 2 && <SkillsStep skills={doc.skills} setSkills={setSkills} version={version} />}
@@ -437,7 +480,7 @@ export default function App() {
             mainUsed={alloc.size}
             budget={baseBudget + bonus}
             bonus={bonus}
-            ascUsed={ascAlloc.size}
+            ascUsed={ascUsed}
             ascBudget={ASC_BUDGET}
             mode={mode}
             set1={setCounts[0]}

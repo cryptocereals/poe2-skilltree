@@ -16,7 +16,7 @@ export interface BuildSkill {
   additional_text?: string;
 }
 
-export type BuildPassiveEntry = string | { id: string; weapon_set?: number };
+export type BuildPassiveEntry = string | { id: string; weapon_set?: number; additional_text?: string };
 
 export interface BuildBody {
   name: string;
@@ -41,6 +41,7 @@ export interface PlannerDoc {
   description: string;
   inventory: BuildInventorySlot[];
   skills: BuildSkill[];
+  notes: Record<string, string>; // node key -> additional_text
 }
 
 export const emptyDoc = (): PlannerDoc => ({
@@ -49,6 +50,7 @@ export const emptyDoc = (): PlannerDoc => ({
   description: "",
   inventory: [],
   skills: [],
+  notes: {},
 });
 
 function idToKeyMap(tree: ParsedTree): Map<string, string> {
@@ -65,15 +67,25 @@ export function exportBuild(
   selectedAsc: string | null,
   doc: PlannerDoc
 ): BuildFile {
+  const noteFor = (key: string) => doc.notes[key]?.trim();
   const passives: BuildPassiveEntry[] = [];
   for (const [key, tag] of alloc) {
     const id = tree.nodes.get(key)?.id;
     if (!id) continue;
-    passives.push(tag === 0 ? id : { id, weapon_set: tag });
+    const note = noteFor(key);
+    if (tag === 0 && !note) passives.push(id);
+    else {
+      const e: { id: string; weapon_set?: number; additional_text?: string } = { id };
+      if (tag !== 0) e.weapon_set = tag;
+      if (note) e.additional_text = note;
+      passives.push(e);
+    }
   }
   for (const key of ascAlloc) {
     const id = tree.nodes.get(key)?.id;
-    if (id) passives.push(id);
+    if (!id) continue;
+    const note = noteFor(key);
+    passives.push(note ? { id, additional_text: note } : id);
   }
 
   const body: BuildBody = { name: doc.name.trim() || "Untitled Build" };
@@ -114,6 +126,7 @@ export function parseBuildFile(text: string, tree: ParsedTree): ParsedBuild {
   const idToKey = idToKeyMap(tree);
   const alloc = new Map<string, Tag>();
   const ascAlloc = new Set<string>();
+  const notes: Record<string, string> = {};
 
   for (const entry of body.passives ?? []) {
     const id = typeof entry === "string" ? entry : entry.id;
@@ -122,6 +135,7 @@ export function parseBuildFile(text: string, tree: ParsedTree): ParsedBuild {
     if (!key) continue;
     if (tree.nodes.get(key)?.ascendancyId) ascAlloc.add(key);
     else alloc.set(key, (ws === 1 || ws === 2 ? ws : 0) as Tag);
+    if (typeof entry !== "string" && entry.additional_text) notes[key] = entry.additional_text;
   }
 
   const selectedAsc = body.ascendancy ?? null;
@@ -133,6 +147,7 @@ export function parseBuildFile(text: string, tree: ParsedTree): ParsedBuild {
     description: body.description ?? "",
     inventory: Array.isArray(body.inventory_slots) ? body.inventory_slots : [],
     skills: Array.isArray(body.skills) ? body.skills : [],
+    notes,
   };
 
   return { selectedClass, selectedAsc, alloc, ascAlloc, doc };

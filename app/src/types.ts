@@ -10,6 +10,8 @@ export interface RawNode {
   isMastery?: boolean;
   isJewelSocket?: boolean;
   isAscendancyStart?: boolean;
+  isMultipleChoiceOption?: boolean;
+  multipleChoiceParent?: number | string;
   ascendancyId?: string;
   classStartIndex?: number[];
   stats?: string[];
@@ -116,6 +118,9 @@ export interface TreeNode {
   x: number;
   y: number;
   grantedPassivePoints?: number;
+  // ascendancy "pick one" sub-node: free (no point cost), mutually exclusive
+  mcOption?: boolean;
+  mcParent?: string;
 }
 
 export interface TreeEdge {
