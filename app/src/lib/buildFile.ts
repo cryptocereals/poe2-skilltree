@@ -81,7 +81,15 @@ export function exportBuild(
   if (doc.description.trim()) body.description = doc.description.trim();
   if (selectedAsc) body.ascendancy = selectedAsc;
   if (passives.length) body.passives = passives;
-  const skills = doc.skills.filter((s) => s.id.trim());
+  const skills: BuildSkill[] = doc.skills
+    .filter((s) => s.id.trim())
+    .map((s) => {
+      const supports = (s.supports ?? []).map((x) => x.trim()).filter(Boolean);
+      const out: BuildSkill = { id: s.id.trim() };
+      if (supports.length) out.supports = supports;
+      if (s.additional_text?.trim()) out.additional_text = s.additional_text.trim();
+      return out;
+    });
   if (skills.length) body.skills = skills;
   const inv = doc.inventory.filter((s) => s.unique?.trim() || s.hint?.trim());
   if (inv.length) body.inventory_slots = inv;
