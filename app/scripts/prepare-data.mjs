@@ -83,4 +83,8 @@ if (!existsSync(podbPath)) {
     console.log("poe2db already cached, skipping fetch");
 }
 
+// Always derive/refresh gem IDs so the file has {name, id} objects
+// (the CDN returns plain name strings; derive-gem-ids adds the id field)
+execSync(`node "${join(__dirname, "derive-gem-ids.mjs")}"`, { stdio: "inherit" });
+
 console.log("prepare-data done");
