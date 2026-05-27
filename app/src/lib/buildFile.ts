@@ -36,6 +36,8 @@ export type LevelInterval = number | number[]; // e.g. 12 or [0, 100]
 export interface BuildInventorySlot {
   inventory_id: string;
   additional_text?: string;
+  unique?: string;
+  hint?: string;
 }
 
 // Internal (planner) skill/support shape — supports are always objects here;
