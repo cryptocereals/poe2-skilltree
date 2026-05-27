@@ -212,7 +212,7 @@ function mapSkillGroups(groups: PobSkillGroup[]): BuildSkill[] {
       out.push({
         id: gem.nameSpec,
         level_interval: gem.level,
-        supports: supports.map((s) => ({ id: s.nameSpec, level_interval: s.level })),
+        support_skills: supports.map((s) => ({ id: s.nameSpec, level_interval: s.level })),
       });
     }
   }
@@ -379,6 +379,7 @@ export async function importPobString(pobString: string, tree: ParsedTree): Prom
     inventory,
     skills,
     notes: {},
+    levels: {},
   };
 
   return { selectedClass, selectedAsc, alloc, ascAlloc, doc, warnings };

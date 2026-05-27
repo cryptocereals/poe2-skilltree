@@ -3,14 +3,39 @@
 import { reach } from "./allocation";
 import type { ParsedTree } from "../types";
 import type { Tag } from "./buildState";
+import type { PoeDb } from "./poedb";
+import { gemIdMap, gemNameMap } from "./poedb";
+
+/** Full game metadata path prefix for gems. */
+const GEM_PATH = "Metadata/Items/Gems/";
+
+/**
+ * Resolve a gem display name to its full metadata ID string, or return the
+ * value as-is if it already looks like a metadata path or no DB is available.
+ */
+function resolveGemId(name: string, idMap: Map<string, string>): string {
+  if (name.startsWith("Metadata/")) return name; // already a path
+  const leaf = idMap.get(name);
+  if (leaf) return GEM_PATH + leaf;
+  console.warn(`[buildFile] No metadata id for gem name: "${name}"`);
+  return name; // fallback: write name as-is
+}
+
+/**
+ * Resolve a full metadata gem ID back to its display name, or return the
+ * value as-is if no match found.
+ */
+function resolveGemName(id: string, nameMap: Map<string, string>): string {
+  if (!id.startsWith(GEM_PATH)) return id; // bare name or unknown format
+  const leaf = id.slice(GEM_PATH.length);
+  return nameMap.get(leaf) ?? id;
+}
 
 export type LevelInterval = number | number[]; // e.g. 12 or [0, 100]
 
 export interface BuildInventorySlot {
   inventory_id: string;
-  unique?: string;
-  hint?: string;
-  level_interval?: LevelInterval;
+  additional_text?: string;
 }
 
 // Internal (planner) skill/support shape — supports are always objects here;
@@ -23,7 +48,7 @@ export interface BuildSupport {
 export interface BuildSkill {
   id: string;
   level_interval?: LevelInterval;
-  supports?: BuildSupport[];
+  support_skills?: BuildSupport[];
   additional_text?: string;
 }
 
@@ -46,14 +71,16 @@ export function makeLevel(startStr: string, endStr: string): LevelInterval | und
   return undefined;
 }
 
-export type BuildPassiveEntry = string | { id: string; weapon_set?: number; additional_text?: string };
+export type BuildPassiveEntry =
+  | string
+  | { id: string; weapon_set?: number; level_interval?: LevelInterval; additional_text?: string };
 
 // File shapes (supports may be bare ids or objects in a real .build).
 type RawSupport = string | { id: string; level_interval?: LevelInterval; additional_text?: string };
 interface RawSkill {
   id: string;
   level_interval?: LevelInterval;
-  supports?: RawSupport[];
+  support_skills?: RawSupport[];
   additional_text?: string;
 }
 
@@ -81,6 +108,7 @@ export interface PlannerDoc {
   inventory: BuildInventorySlot[];
   skills: BuildSkill[];
   notes: Record<string, string>; // node key -> additional_text
+  levels: Record<string, LevelInterval>; // node key -> level_interval
 }
 
 export const emptyDoc = (): PlannerDoc => ({
@@ -90,6 +118,7 @@ export const emptyDoc = (): PlannerDoc => ({
   inventory: [],
   skills: [],
   notes: {},
+  levels: {},
 });
 
 function idToKeyMap(tree: ParsedTree): Map<string, string> {
@@ -104,18 +133,24 @@ export function exportBuild(
   alloc: Map<string, Tag>,
   ascAlloc: Set<string>,
   selectedAsc: string | null,
-  doc: PlannerDoc
+  doc: PlannerDoc,
+  db?: PoeDb
 ): BuildFile {
+  const skillIdMap = db ? gemIdMap(db.skillGems) : new Map<string, string>();
+  const supportIdMap = db ? gemIdMap(db.supportGems) : new Map<string, string>();
   const noteFor = (key: string) => doc.notes[key]?.trim();
+  const levelFor = (key: string) => doc.levels[key];
   const passives: BuildPassiveEntry[] = [];
   for (const [key, tag] of alloc) {
     const id = tree.nodes.get(key)?.id;
     if (!id) continue;
     const note = noteFor(key);
-    if (tag === 0 && !note) passives.push(id);
+    const lvl = levelFor(key);
+    if (tag === 0 && !note && lvl == null) passives.push(id);
     else {
-      const e: { id: string; weapon_set?: number; additional_text?: string } = { id };
+      const e: { id: string; weapon_set?: number; level_interval?: LevelInterval; additional_text?: string } = { id };
       if (tag !== 0) e.weapon_set = tag;
+      if (lvl != null) e.level_interval = lvl;
       if (note) e.additional_text = note;
       passives.push(e);
     }
@@ -124,7 +159,15 @@ export function exportBuild(
     const id = tree.nodes.get(key)?.id;
     if (!id) continue;
     const note = noteFor(key);
-    passives.push(note ? { id, additional_text: note } : id);
+    const lvl = levelFor(key);
+    if (!note && lvl == null) {
+      passives.push(id);
+    } else {
+      const e: { id: string; level_interval?: LevelInterval; additional_text?: string } = { id };
+      if (lvl != null) e.level_interval = lvl;
+      if (note) e.additional_text = note;
+      passives.push(e);
+    }
   }
 
   const body: BuildBody = { name: doc.name.trim() || "Untitled Build" };
@@ -136,23 +179,25 @@ export function exportBuild(
   const skills: RawSkill[] = doc.skills
     .filter((s) => s.id.trim())
     .map((s) => {
-      const out: RawSkill = { id: s.id.trim() };
+      const out: RawSkill = { id: resolveGemId(s.id.trim(), skillIdMap) };
       if (s.level_interval != null) out.level_interval = s.level_interval;
-      const sup: RawSupport[] = (s.supports ?? [])
+      const sup: RawSupport[] = (s.support_skills ?? [])
         .filter((x) => x.id.trim())
         .map((x) => {
-          const o: { id: string; level_interval?: LevelInterval; additional_text?: string } = { id: x.id.trim() };
+          const o: { id: string; level_interval?: LevelInterval; additional_text?: string } = {
+            id: resolveGemId(x.id.trim(), supportIdMap),
+          };
           if (x.level_interval != null) o.level_interval = x.level_interval;
           if (x.additional_text?.trim()) o.additional_text = x.additional_text.trim();
           return o.level_interval != null || o.additional_text ? o : o.id;
         });
-      if (sup.length) out.supports = sup;
+      if (sup.length) out.support_skills = sup;
       if (s.additional_text?.trim()) out.additional_text = s.additional_text.trim();
       return out;
     });
   if (skills.length) body.skills = skills;
 
-  const inv = doc.inventory.filter((s) => s.unique?.trim() || s.hint?.trim() || s.level_interval != null);
+  const inv = doc.inventory.filter((s) => s.additional_text?.trim());
   if (inv.length) body.inventory_slots = inv;
 
   return { Build: body };
@@ -167,7 +212,7 @@ export interface ParsedBuild {
 }
 
 /** Parse an imported `.build` into app state. Throws on malformed JSON. */
-export function parseBuildFile(text: string, tree: ParsedTree): ParsedBuild {
+export function parseBuildFile(text: string, tree: ParsedTree, db?: PoeDb): ParsedBuild {
   const json = JSON.parse(text);
   const body: BuildBody = json && json.Build ? json.Build : json;
   if (!body || typeof body !== "object") throw new Error("Not a build file");
@@ -176,6 +221,7 @@ export function parseBuildFile(text: string, tree: ParsedTree): ParsedBuild {
   const alloc = new Map<string, Tag>();
   const ascAlloc = new Set<string>();
   const notes: Record<string, string> = {};
+  const levels: Record<string, LevelInterval> = {};
 
   for (const entry of body.passives ?? []) {
     const id = typeof entry === "string" ? entry : entry.id;
@@ -184,11 +230,17 @@ export function parseBuildFile(text: string, tree: ParsedTree): ParsedBuild {
     if (!key) continue;
     if (tree.nodes.get(key)?.ascendancyId) ascAlloc.add(key);
     else alloc.set(key, (ws === 1 || ws === 2 ? ws : 0) as Tag);
-    if (typeof entry !== "string" && entry.additional_text) notes[key] = entry.additional_text;
+    if (typeof entry !== "string") {
+      if (entry.additional_text) notes[key] = entry.additional_text;
+      if (entry.level_interval != null) levels[key] = entry.level_interval;
+    }
   }
 
   const selectedAsc = body.ascendancy ?? null;
   const selectedClass = inferClass(tree, selectedAsc, alloc);
+
+  const skillNameMap = db ? gemNameMap(db.skillGems) : new Map<string, string>();
+  const supportNameMap = db ? gemNameMap(db.supportGems) : new Map<string, string>();
 
   const doc: PlannerDoc = {
     name: body.name ?? "",
@@ -196,16 +248,17 @@ export function parseBuildFile(text: string, tree: ParsedTree): ParsedBuild {
     description: body.description ?? "",
     inventory: Array.isArray(body.inventory_slots) ? body.inventory_slots : [],
     skills: (Array.isArray(body.skills) ? body.skills : []).map((s) => ({
-      id: s.id,
+      id: resolveGemName(s.id, skillNameMap),
       level_interval: s.level_interval,
-      supports: (s.supports ?? []).map((x) =>
+      support_skills: (s.support_skills ?? []).map((x) =>
         typeof x === "string"
-          ? { id: x }
-          : { id: x.id, level_interval: x.level_interval, additional_text: x.additional_text }
+          ? { id: resolveGemName(x, supportNameMap) }
+          : { id: resolveGemName(x.id, supportNameMap), level_interval: x.level_interval, additional_text: x.additional_text }
       ),
       additional_text: s.additional_text,
     })),
     notes,
+    levels,
   };
 
   return { selectedClass, selectedAsc, alloc, ascAlloc, doc };

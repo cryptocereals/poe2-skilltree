@@ -29,6 +29,7 @@ interface Props {
   allocated: Set<string>;
   weaponTag: Map<string, 1 | 2>;
   ascOffset: { dx: number; dy: number } | null;
+  ascAngle: number | null;
   alloc: Map<string, Tag>;
   ascAlloc: Set<string>;
   mode: Tag;
@@ -161,6 +162,7 @@ function TreeCanvas(props: Props) {
           allocated: p.allocated,
           weaponTag: p.weaponTag,
           ascOffset: p.ascOffset,
+          ascAngle: p.ascAngle,
           previewKeys: previewRef.current?.keys ?? EMPTY_KEYS,
           previewTag: previewRef.current?.tag ?? 0,
           notedKeys: p.notedKeys,
@@ -269,10 +271,10 @@ function TreeCanvas(props: Props) {
       // preview the path this node would allocate
       const pv = hit
         ? previewAllocation(
-            p.tree,
-            { selectedClass: p.selectedClass, selectedAsc: p.selectedAsc, mode: p.mode, alloc: p.alloc, ascAlloc: p.ascAlloc },
-            hit
-          )
+          p.tree,
+          { selectedClass: p.selectedClass, selectedAsc: p.selectedAsc, mode: p.mode, alloc: p.alloc, ascAlloc: p.ascAlloc },
+          hit
+        )
         : null;
       previewRef.current = pv ? { keys: new Set(pv.keys), tag: pv.tag } : null;
       cam.dirty = true;

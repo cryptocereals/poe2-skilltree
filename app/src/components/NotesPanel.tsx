@@ -11,9 +11,27 @@ interface Props {
   nodes: NoteNode[];
   notes: Record<string, string>;
   setNote: (key: string, text: string) => void;
+  focusKey?: string | null;
+  focusName?: string | null;
 }
 
-function NotesPanel({ nodes, notes, setNote }: Props) {
+function NotesPanel({ nodes, notes, setNote, focusKey, focusName }: Props) {
+  // Single-node mode: triggered whenever focusKey prop is explicitly provided
+  // (even null = nothing selected → render nothing)
+  if (focusKey !== undefined) {
+    if (focusKey == null) return null;
+    const node = nodes.find((n) => n.key === focusKey);
+    const name = node?.name ?? focusName ?? null;
+    if (!name) return null;
+    return (
+      <div className="panel notes-panel notes-panel--focused">
+        <div className="panel__title">{name}</div>
+        <MarkupEditor value={notes[focusKey] ?? ""} onChange={(v) => setNote(focusKey, v)} />
+      </div>
+    );
+  }
+
+  // Full list mode (used outside planner or when nothing focused)
   const [tab, setTab] = useState<"asc" | "main">("asc");
   const asc = nodes.filter((n) => n.asc);
   const main = nodes.filter((n) => !n.asc);

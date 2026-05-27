@@ -53,6 +53,32 @@ export class Atlas {
     if (alpha !== 1) ctx.globalAlpha = 1;
     return Math.max(w, h);
   }
+  /** Same as drawCentered but rotates the sprite by `angle` radians around
+   *  world point (cx, cy) before drawing. */
+  drawCenteredRotated(
+    ctx: CanvasRenderingContext2D,
+    key: string,
+    cx: number,
+    cy: number,
+    angle: number,
+    size?: number,
+    alpha = 1
+  ): void {
+    const f = this.frames[key];
+    if (!f) return;
+    const natW = f.w / this.scale;
+    const natH = f.h / this.scale;
+    const ratio = size ? size / Math.max(natW, natH) : 1;
+    const w = natW * ratio;
+    const h = natH * ratio;
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.rotate(angle);
+    if (alpha !== 1) ctx.globalAlpha = alpha;
+    ctx.drawImage(this.img, f.x, f.y, f.w, f.h, -w / 2, -h / 2, w, h);
+    if (alpha !== 1) ctx.globalAlpha = 1;
+    ctx.restore();
+  }
 }
 
 function loadImage(src: string): Promise<HTMLImageElement> {
@@ -69,6 +95,7 @@ export interface AtlasSet {
   skillsDisabled: Atlas;
   frame: Atlas;
   mastery: Atlas;
+  groupBg: Atlas;
   // ascendancy background art, keyed by lowercase class name
   backgrounds: Record<string, Atlas>;
 }
@@ -87,14 +114,15 @@ const BG_CLASSES = [
 ];
 
 export async function loadAtlases(): Promise<AtlasSet> {
-  const [skills, skillsDisabled, frame, mastery, ...bgs] = await Promise.all([
+  const [skills, skillsDisabled, frame, mastery, groupBg, ...bgs] = await Promise.all([
     new Atlas().load("skills"),
     new Atlas().load("skills-disabled"),
     new Atlas().load("frame"),
     new Atlas().load("mastery-effect-active"),
+    new Atlas().load("group-background"),
     ...BG_CLASSES.map((c) => new Atlas().load(`background-${c}`)),
   ]);
   const backgrounds: Record<string, Atlas> = {};
   BG_CLASSES.forEach((c, i) => (backgrounds[c] = bgs[i]));
-  return { skills, skillsDisabled, frame, mastery, backgrounds };
+  return { skills, skillsDisabled, frame, mastery, groupBg, backgrounds };
 }

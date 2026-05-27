@@ -28,6 +28,7 @@ export interface RawNode {
   grantedDexterity?: number;
   grantedIntelligence?: number;
   grantedPassivePoints?: number;
+  unlockConstraint?: { nodes: number[] };
 }
 
 export interface RawGroup {
@@ -121,6 +122,8 @@ export interface TreeNode {
   // ascendancy "pick one" sub-node: free (no point cost), mutually exclusive
   mcOption?: boolean;
   mcParent?: string;
+  // node is hidden until all listed node keys are allocated
+  unlockConstraint?: string[];
 }
 
 export interface TreeEdge {
@@ -157,6 +160,8 @@ export interface ParsedTree {
   classStart: Map<number, TreeNode>;
   // first start node per ascendancyId
   ascStart: Map<string, TreeNode>;
+  // bounding box of all nodes per ascendancyId
+  ascBox: Map<string, { minX: number; minY: number; maxX: number; maxY: number }>;
   // per class index: node key -> class-specific override of that node
   classOverrides: Map<number, Map<string, NodeOverride>>;
   // undirected connectivity for pathfinding (node key -> neighbour keys)

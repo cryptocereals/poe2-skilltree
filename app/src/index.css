@@ -256,6 +256,26 @@ body {
   width: 320px;
   padding: 14px;
 }
+.search--compact {
+  width: auto;
+  padding: 8px;
+}
+.search__icon-btn {
+  display: grid;
+  place-content: center;
+  width: 38px;
+  height: 38px;
+  background: transparent;
+  border: none;
+  color: var(--gold);
+  cursor: pointer;
+  opacity: 0.8;
+  transition: opacity 0.15s, color 0.15s;
+}
+.search__icon-btn:hover {
+  opacity: 1;
+  color: var(--gold-bright);
+}
 .search__field {
   display: flex;
   align-items: center;
@@ -360,9 +380,9 @@ body {
 /* ---- Class / Ascendancy (left) ----------------------------------------- */
 
 .classes {
-  left: 22px;
+  right: 22px;
   bottom: 22px;
-  width: 320px;
+  width: 290px;
   padding: 16px;
 }
 .class-grid {
@@ -556,16 +576,17 @@ body {
   color: var(--ink);
 }
 
-/* ---- Build planner bar (top-center) ------------------------------------ */
+/* ---- Build planner bar (bottom-center) --------------------------------- */
 
 .build {
-  top: 20px;
+  bottom: 22px;
+  top: auto;
   left: 50%;
   transform: translateX(-50%);
   display: flex;
   align-items: center;
-  gap: 14px;
-  padding: 10px 16px;
+  gap: 18px;
+  padding: 14px 22px;
 }
 .build__hint {
   font-family: var(--font-body);
@@ -628,6 +649,7 @@ body {
 }
 .build__seg {
   display: flex;
+  flex-shrink: 0;
   border: 1px solid var(--line);
   border-radius: 3px;
   overflow: hidden;
@@ -635,6 +657,7 @@ body {
 .build__seg button {
   padding: 4px 11px;
   white-space: nowrap;
+  flex-shrink: 0;
   background: rgba(0, 0, 0, 0.3);
   border: none;
   color: var(--ink-dim);
@@ -803,7 +826,7 @@ body {
 /* ---- Zoom controls (bottom-right) -------------------------------------- */
 
 .controls {
-  right: 22px;
+  left: 22px;
   bottom: 22px;
   padding: 8px;
   display: flex;
@@ -836,6 +859,34 @@ body {
   text-align: center;
   color: var(--ink-faint);
   padding: 2px 0;
+}
+
+/* ---- Side columns (left / right) --------------------------------------- */
+
+.side-col {
+  position: absolute;
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}
+.side-col--left {
+  top: 22px;
+  left: 22px;
+}
+.side-col--right {
+  top: 22px;
+  right: 22px;
+  align-items: flex-end;
+}
+/* Panels inside columns are in normal flow, not absolutely positioned */
+.side-col .panel {
+  position: relative;
+  top: auto;
+  left: auto;
+  right: auto;
+  bottom: auto;
 }
 
 /* ---- Build planner wizard ----------------------------------------------- */
@@ -908,6 +959,22 @@ body {
 .wizard__exit:hover {
   border-color: var(--removed);
   color: var(--removed);
+}
+.wizard__minimize {
+  background: transparent;
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  color: var(--ink-dim);
+  width: 28px;
+  height: 28px;
+  cursor: pointer;
+  display: grid;
+  place-content: center;
+  transition: border-color 0.15s, color 0.15s;
+}
+.wizard__minimize:hover {
+  border-color: var(--gold);
+  color: var(--gold);
 }
 .wizard__steps {
   display: flex;
@@ -986,9 +1053,12 @@ body {
   border-color: var(--gold);
 }
 
-/* passives-step points bar sits below the wizard bar */
-.app.planner .build {
-  top: 82px;
+/* zoom controls sit top-right below the wizard bar in planner mode */
+.app.planner .controls {
+  top: 83px;
+  bottom: auto;
+  left: 22px;
+  right: auto;
 }
 
 /* step form panels (Details / Skills / Inventory) */
@@ -1109,8 +1179,7 @@ body {
   overflow: hidden;
 }
 .inv-slot-block .mk-editor {
-  margin-left: 116px;
-  width: calc(100% - 116px);
+  width: 100%;
 }
 .lvl-field:focus {
   outline: none;
@@ -1190,7 +1259,7 @@ body {
 }
 .skill-support input {
   flex: 1;
-  background: rgba(0, 0, 0, 0.3);
+  background: #1a1a1a;
   border: 1px solid var(--line-soft);
   border-radius: 3px;
   color: var(--ink);
@@ -1246,6 +1315,26 @@ body {
   max-height: calc(100vh - 130px);
   overflow-y: auto;
   padding: 14px;
+}
+.notes-panel--focused {
+  width: 280px;
+}
+.notes-panel--focused .panel__title {
+  font-size: 12px;
+  color: var(--gold-bright);
+  margin-bottom: 10px;
+}
+.passives-locked-hint {
+  top: 92px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 12px 18px;
+  color: var(--ink-dim);
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-style: italic;
+  text-align: center;
+  pointer-events: none;
 }
 .notes-list {
   display: flex;
@@ -1409,6 +1498,8 @@ textarea.note-item__input {
 }
 
 /* smooth collapse */
+.side-col--left,
+.side-col--right,
 .search,
 .version,
 .classes {
@@ -1421,7 +1512,8 @@ textarea.note-item__input {
 
 @media (max-width: 1280px) {
   .build {
-    top: 12px;
+    bottom: 12px;
+    top: auto;
     left: 12px;
     right: 12px;
     transform: none;
@@ -1429,15 +1521,23 @@ textarea.note-item__input {
     flex-wrap: wrap;
     row-gap: 8px;
   }
-  .search {
+  .side-col--left {
+    left: 12px;
+  }
+  .side-col--right {
+    right: 12px;
+  }
+  .side-col .search {
+    width: clamp(220px, 38vw, 320px);
+  }
+  .side-col .version {
+    width: clamp(200px, 32vw, 290px);
+  }
+  /* Planner mode standalone search */
+  .app.planner .search {
     top: 84px;
     left: 12px;
     width: clamp(220px, 38vw, 320px);
-  }
-  .version {
-    top: 84px;
-    right: 12px;
-    width: clamp(200px, 32vw, 290px);
   }
 }
 
@@ -1448,6 +1548,8 @@ textarea.note-item__input {
     display: grid;
   }
   .build {
+    bottom: 16px;
+    top: auto;
     left: 40px;
     right: 40px;
     padding: 8px 10px;
@@ -1456,32 +1558,39 @@ textarea.note-item__input {
     justify-content: flex-start;
     flex-wrap: nowrap;
   }
-  /* panels hidden by default on mobile; revealed via the edge toggles.
+  /* side columns hidden by default on mobile; revealed via the edge toggles.
      Uses `display` because framer-motion sets inline transform/opacity. */
-  .search,
-  .classes {
+  .side-col--left,
+  .side-col--right {
+    display: none;
+    gap: 6px;
+  }
+  .side-col--left {
+    left: 10px;
+  }
+  .side-col--right {
+    right: 10px;
+  }
+  .side-col .search {
+    width: min(82vw, 340px);
+  }
+  .side-col .classes {
+    width: min(72vw, 290px);
+  }
+  .side-col .version {
+    width: min(72vw, 290px);
+  }
+  /* Planner mode standalone search panel */
+  .app.planner .search {
+    top: 74px;
     left: 10px;
     width: min(82vw, 340px);
-    display: none;
   }
-  .search {
-    top: 74px;
+  .app.show-left .side-col--left {
+    display: flex;
   }
-  .classes {
-    bottom: 16px;
-  }
-  .version {
-    top: 74px;
-    right: 10px;
-    width: min(72vw, 290px);
-    display: none;
-  }
-  .app.show-left .search,
-  .app.show-left .classes {
-    display: block;
-  }
-  .app.show-right .version {
-    display: block;
+  .app.show-right .side-col--right {
+    display: flex;
   }
 }
 

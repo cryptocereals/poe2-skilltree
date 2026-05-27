@@ -3,6 +3,10 @@ import type { ParsedTree, TreeNode } from "../types";
 
 export const ASC_BUDGET = 8;
 export const SWAP_MAX = 25; // max swap passives PER weapon set (Set I and Set II each)
+export const SWAP_MAX_MASTER = 100; // cap when Weapon Master (node 8272) is allocated
+export const WEAPON_MASTER_KEY = "8272";
+const swapCap = (alloc: Map<string, Tag>, ascAlloc: Set<string>) =>
+  alloc.has(WEAPON_MASTER_KEY) || ascAlloc.has(WEAPON_MASTER_KEY) ? SWAP_MAX_MASTER : SWAP_MAX;
 
 // Weapon-set tag on an allocated main-tree node: 0 = shared (gold),
 // 1 = Set I (red), 2 = Set II (green).
@@ -23,7 +27,7 @@ export const initialBuild: BuildState = {
   mode: 0,
   alloc: new Map(),
   ascAlloc: new Set(),
-  baseBudget: 123,
+  baseBudget: 125,
 };
 
 export type BuildAction =
@@ -34,12 +38,12 @@ export type BuildAction =
   | { type: "setBudget"; n: number }
   | { type: "clear" }
   | {
-      type: "load";
-      selectedClass: number | null;
-      selectedAsc: string | null;
-      alloc: Map<string, Tag>;
-      ascAlloc: Set<string>;
-    };
+    type: "load";
+    selectedClass: number | null;
+    selectedAsc: string | null;
+    alloc: Map<string, Tag>;
+    ascAlloc: Set<string>;
+  };
 
 const tagCount = (alloc: Map<string, Tag>, tag: Tag) => {
   let n = 0;
@@ -112,7 +116,7 @@ export function previewAllocation(
   };
   const path = pathFrom(adj, sources, node.key, canTraverse);
   if (!path) return null;
-  if (m !== 0 && tagCount(st.alloc, m) + path.length > SWAP_MAX) return null;
+  if (m !== 0 && tagCount(st.alloc, m) + path.length > swapCap(st.alloc, st.ascAlloc)) return null;
   return { keys: path, tag: m };
 }
 
@@ -197,7 +201,7 @@ export function buildReducer(s: BuildState, a: BuildAction): BuildState {
       };
       const path = pathFrom(adj, sources, node.key, canTraverse);
       if (!path) return s;
-      if (m !== 0 && tagCount(s.alloc, m) + path.length > SWAP_MAX) return s;
+      if (m !== 0 && tagCount(s.alloc, m) + path.length > swapCap(s.alloc, s.ascAlloc)) return s;
       const next = new Map(s.alloc);
       path.forEach((k) => next.set(k, m));
       return { ...s, alloc: next };

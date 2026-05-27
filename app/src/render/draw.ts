@@ -85,6 +85,7 @@ export interface RenderOpts {
   allocated: Set<string>;
   weaponTag: Map<string, 1 | 2>;
   ascOffset: { dx: number; dy: number } | null; // shifts the selected ascendancy to centre
+  ascAngle: number | null;                        // rotation of the group-bg illumination icon
   previewKeys: Set<string>; // path a hovered node would allocate
   previewTag: 0 | 1 | 2;
   notedKeys: Set<string>; // nodes that have a planner note → show a badge
@@ -123,15 +124,17 @@ export function renderTree(
   const vy1 = cam.y + H / 2 / z + margin;
   const inView = (x: number, y: number) => x > vx0 && x < vx1 && y > vy0 && y < vy1;
 
-  const dimAsc = !!opts.selectedAsc;
   const ascPrefix = opts.ascPrefixForClass;
   const alphaFor = (n: TreeNode): number => {
-    if (dimAsc) {
-      if (n.ascendancyId === opts.selectedAsc) return 1;
-      return n.ascendancyId ? 0.08 : 0.22;
-    }
-    if (ascPrefix && n.ascendancyId && !n.ascendancyId.startsWith(ascPrefix)) return 0.12;
-    return 1;
+    if (n.unlockConstraint && !n.unlockConstraint.every((k) => opts.allocated.has(k))) return 0;
+    let base: number;
+    if (opts.selectedAsc) {
+      if (n.ascendancyId === opts.selectedAsc) base = 1;
+      else if (n.ascendancyId) base = 0.08;
+      else base = 0.5; // main tree slightly dimmed
+    } else if (ascPrefix && n.ascendancyId && !n.ascendancyId.startsWith(ascPrefix)) base = 0.12;
+    else base = 1;
+    return base;
   };
 
   // The selected ascendancy is drawn shifted into the empty centre of the tree.
@@ -157,6 +160,15 @@ export function renderTree(
       const cy = off && bg.ascId === selAsc ? bg.cy + off.dy : bg.cy;
       if (cx < vx0 - bgHalf || cx > vx1 + bgHalf || cy < vy0 - bgHalf || cy > vy1 + bgHalf) continue;
       set.backgrounds[bg.cls]?.drawCentered(ctx, bg.frame, cx, cy, undefined, a);
+    }
+  }
+
+  // ---- group-background ring at centre when ascendancy is active ----------
+  if (opts.selectedAsc && off) {
+    const natSize = 4000 * 0.95; // slightly smaller than natural sprite size
+    set.groupBg.drawCentered(ctx, "startNode:MainCircle", 0, 0, natSize, 0.85);
+    if (opts.ascAngle != null) {
+      set.groupBg.drawCenteredRotated(ctx, "startNode:MainCircleActive", 0, 0, opts.ascAngle, natSize, 0.9);
     }
   }
 

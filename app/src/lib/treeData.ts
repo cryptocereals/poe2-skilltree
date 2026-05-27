@@ -59,7 +59,7 @@ async function fetchJsonWithProgress<T>(url: string, onProgress?: ProgressFn): P
   const reader = res.body.getReader();
   const chunks: Uint8Array[] = [];
   let received = 0;
-  for (;;) {
+  for (; ;) {
     const { done, value } = await reader.read();
     if (done) break;
     chunks.push(value);
@@ -122,6 +122,7 @@ export async function loadTree(version: string, onProgress?: ProgressFn): Promis
       grantedPassivePoints: n.grantedPassivePoints,
       mcOption: !!n.isMultipleChoiceOption,
       mcParent: n.multipleChoiceParent != null ? String(n.multipleChoiceParent) : undefined,
+      unlockConstraint: n.unlockConstraint?.nodes.map(String),
     };
     nodes.set(key, tn);
     nodeList.push(tn);
@@ -259,6 +260,7 @@ export async function loadTree(version: string, onProgress?: ProgressFn): Promis
     ascBackgrounds,
     classStart,
     ascStart,
+    ascBox,
     classOverrides,
     adjacency,
   };

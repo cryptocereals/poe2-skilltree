@@ -3,7 +3,7 @@ import { Camera } from "./lib/camera";
 import { loadAtlases, type AtlasSet } from "./lib/atlas";
 import { loadTree } from "./lib/treeData";
 import { computeDiff } from "./lib/diff";
-import { buildReducer, initialBuild, ASC_BUDGET, SWAP_MAX, type Tag } from "./lib/buildState";
+import { buildReducer, initialBuild, ASC_BUDGET, SWAP_MAX, SWAP_MAX_MASTER, WEAPON_MASTER_KEY, type Tag } from "./lib/buildState";
 import type { ParsedTree, TreeNode, VersionDiff } from "./types";
 import TreeCanvas, { type FocusTarget } from "./components/TreeCanvas";
 import SearchPanel from "./components/SearchPanel";
@@ -28,6 +28,7 @@ import {
 } from "./lib/buildFile";
 import { importPobString } from "./lib/pobImport";
 import { isPobExport } from "./lib/pobDecode";
+import { loadPoeDb } from "./lib/poedb";
 import PobImportModal from "./components/PobImportModal";
 
 type Version = "0.5" | "0.4";
@@ -66,6 +67,7 @@ export default function App() {
   // planner mode (build wizard)
   const [planner, setPlanner] = useState(false);
   const [step, setStep] = useState(0);
+  const [wizardMinimized, setWizardMinimized] = useState(false);
   const [doc, setDoc] = useState<PlannerDoc>(emptyDoc());
 
   // all selection + build-planner state in one reducer
@@ -159,11 +161,21 @@ export default function App() {
       dispatch({ type: "selectAsc", id });
       const t = trees.current?.[version];
       if (id && t) {
-        const start = t.ascStart.get(id);
-        if (start) goTo(start.x, start.y, 0.4);
+        const box = t.ascBox.get(id);
+        if (box) {
+          const cam = cameraRef.current;
+          const w = box.maxX - box.minX;
+          const h = box.maxY - box.minY;
+          const zoom = Math.min(cam.vw / w, cam.vh / h) * 0.75;
+          goTo(0, 0, Math.min(zoom, 0.6));
+        } else {
+          goTo(0, 0, 0.4);
+        }
+      } else {
+        resetView();
       }
     },
-    [version, goTo]
+    [version, goTo, resetView]
   );
 
   const pickSearch = useCallback(
@@ -180,7 +192,11 @@ export default function App() {
     if (b) setVersionState("0.5"); // diff is expressed relative to 0.4 → view 0.5
   }, []);
 
-  // click a node: allocate, or switch ascendancy / focus when not allocatable
+  // click a node: allocate, or switch ascendancy / focus when not allocatable.
+  // In planner mode the tree is read-only for allocation; on the Passives
+  // step a click only focuses the node so its note can be edited — and only
+  // if that node is currently allocated. Notes live on allocated passives;
+  // a separate effect prunes them when a node gets unallocated.
   const handleNodeClick = useCallback(
     (node: TreeNode | null) => {
       if (!node) {
@@ -189,6 +205,15 @@ export default function App() {
       }
       const t = trees.current?.[version];
       if (!t) return;
+
+      // Planner: never mutate allocations from the tree.
+      if (planner) {
+        if (step === 1 && (alloc.has(node.key) || ascAlloc.has(node.key))) {
+          setFocusKey(node.key);
+        }
+        return;
+      }
+
       if (node.ascendancyId && selectedAsc !== node.ascendancyId) {
         selectAsc(node.ascendancyId);
         return;
@@ -199,7 +224,7 @@ export default function App() {
       }
       dispatch({ type: "clickNode", node, tree: t });
     },
-    [version, selectedClass, selectedAsc, selectAsc]
+    [version, selectedClass, selectedAsc, selectAsc, planner, step, alloc, ascAlloc]
   );
 
   const setMode = useCallback((m: Tag) => dispatch({ type: "setMode", mode: m }), []);
@@ -216,12 +241,16 @@ export default function App() {
       if (e.key === "Escape") {
         setQuery("");
         setFocusKey(null);
-        dispatch({ type: "selectClass", idx: null });
+        // In planner mode, never wipe the class/allocations — the user manages
+        // that deliberately through the wizard steps.
+        if (!planner) {
+          dispatch({ type: "selectClass", idx: null });
+        }
       }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, []);
+  }, [planner]);
 
   // ---- planner ----
   const enterPlanner = useCallback(() => {
@@ -245,6 +274,7 @@ export default function App() {
   const goToStep = useCallback(
     (s: number) => {
       setStep(s);
+      setWizardMinimized(false);
       if (s === 1) {
         const t = trees.current?.[version];
         const start = selectedClass != null && t ? t.classStart.get(selectedClass) : null;
@@ -265,10 +295,27 @@ export default function App() {
     []
   );
 
+  // In planner mode, notes are tied to allocation: when a passive is no
+  // longer allocated (because the user deallocated it, or it was orphaned by
+  // removing an upstream node), drop its note. Outside planner mode the
+  // notes dict is empty anyway, so this is a no-op.
+  useEffect(() => {
+    if (!planner) return;
+    setDoc((d) => {
+      let changed = false;
+      const next: Record<string, string> = {};
+      for (const [k, v] of Object.entries(d.notes)) {
+        if (alloc.has(k) || ascAlloc.has(k)) next[k] = v;
+        else changed = true;
+      }
+      return changed ? { ...d, notes: next } : d;
+    });
+  }, [planner, alloc, ascAlloc]);
+
   const onExport = useCallback(() => {
     const t = trees.current?.[version];
     if (!t) return;
-    downloadBuild(exportBuild(t, alloc, ascAlloc, selectedAsc, doc));
+    loadPoeDb().then((db) => downloadBuild(exportBuild(t, alloc, ascAlloc, selectedAsc, doc, db)));
   }, [version, alloc, ascAlloc, selectedAsc, doc]);
 
   const applyParsedBuild = useCallback(
@@ -302,7 +349,8 @@ export default function App() {
             console.warn("[PoB import]", result.warnings.join("\n"));
           }
         } else {
-          const parsed = parseBuildFile(text, t);
+          const db = await loadPoeDb();
+          const parsed = parseBuildFile(text, t, db);
           applyParsedBuild(parsed, t);
         }
       } catch (e) {
@@ -352,8 +400,35 @@ export default function App() {
     return m;
   }, [alloc]);
 
-  // Ascendancies render in place at the tree's edge (no centre relocation).
-  const ascOffset = null;
+  // Shift the selected ascendancy wheel to the centre of the tree (0, 0).
+  const ascOffset = useMemo(() => {
+    if (!selectedAsc || !tree) return null;
+    const box = tree.ascBox.get(selectedAsc);
+    if (!box) return null;
+    return {
+      dx: -((box.minX + box.maxX) / 2),
+      dy: -((box.minY + box.maxY) / 2),
+    };
+  }, [selectedAsc, tree]);
+
+  // Rotate the illumination icon so the 12-o'clock marker points in the same
+  // direction as the ascendancy from the tree centre (outward).
+  // Derivation: sprite north (0,-1) maps to screen direction (sin θ, -cos θ)
+  // after ctx.rotate(θ). We want (sin θ, -cos θ) = normalised(cx, cy),
+  // so sin θ = cx/r, cos θ = cy/r → θ = atan2(cx, cy).
+  // But since y-axis in canvas goes DOWN, the "outward" direction for an
+  // ascendancy at world (cx, cy) is simply (cx/r, cy/r) visually, so:
+  // θ = atan2(cx, -cy)  ← −cy converts canvas-y to math-y before atan2.
+  const ascAngle = useMemo(() => {
+    if (!selectedAsc || !tree) return null;
+    const box = tree.ascBox.get(selectedAsc);
+    if (!box) return null;
+    const cx = (box.minX + box.maxX) / 2;
+    const cy = (box.minY + box.maxY) / 2;
+    const raw = Math.atan2(cx, -cy) - Math.PI / 6;
+    const step = Math.PI / 3; // 60°
+    return Math.round(raw / step) * step;
+  }, [selectedAsc, tree]);
 
   const bonus = useMemo(() => {
     if (!tree) return 0;
@@ -373,6 +448,10 @@ export default function App() {
     alloc.forEach((t) => (t === 1 ? a++ : t === 2 ? b++ : 0));
     return [a, b] as const;
   }, [alloc]);
+
+  // Passives spent: shared + max(set1, set2), since weapon-set passives are
+  // alternates (only one set is active at a time) → only the larger costs.
+  const mainUsed = alloc.size - Math.min(setCounts[0], setCounts[1]);
 
   const ascUsed = useMemo(() => {
     if (!tree) return 0;
@@ -451,6 +530,7 @@ export default function App() {
         allocated={allocated}
         weaponTag={weaponTag}
         ascOffset={ascOffset}
+        ascAngle={ascAngle}
         alloc={alloc}
         ascAlloc={ascAlloc}
         mode={mode}
@@ -468,8 +548,10 @@ export default function App() {
             setStep={goToStep}
             onExport={onExport}
             onExit={exitPlanner}
+            minimized={wizardMinimized}
+            onToggleMinimize={() => setWizardMinimized((v) => !v)}
           />
-          {step === 0 && (
+          {!wizardMinimized && step === 0 && (
             <DetailsStep
               name={doc.name}
               author={doc.author}
@@ -485,19 +567,21 @@ export default function App() {
           )}
           {step === 1 && (
             <>
-              <SearchPanel
-                query={query}
-                setQuery={setQuery}
-                results={results}
-                total={results.length}
-                diff={diff}
-                diffOn={diffOn}
-                onPick={pickSearch}
-                overrides={activeOverrides}
-              />
+              {!wizardMinimized && (
+                <SearchPanel
+                  query={query}
+                  setQuery={setQuery}
+                  results={results}
+                  total={results.length}
+                  diff={diff}
+                  diffOn={diffOn}
+                  onPick={pickSearch}
+                  overrides={activeOverrides}
+                />
+              )}
               <BuildPanel
                 hasClass={selectedClass != null}
-                mainUsed={alloc.size}
+                mainUsed={mainUsed}
                 budget={baseBudget + bonus}
                 bonus={bonus}
                 ascUsed={ascUsed}
@@ -505,45 +589,68 @@ export default function App() {
                 mode={mode}
                 set1={setCounts[0]}
                 set2={setCounts[1]}
-                swapMax={SWAP_MAX}
+                swapMax={ascAlloc.has(WEAPON_MASTER_KEY) ? SWAP_MAX_MASTER : SWAP_MAX}
                 setMode={setMode}
                 setBaseBudget={setBaseBudget}
                 onClear={clearBuild}
               />
-              <NotesPanel nodes={notesNodes} notes={doc.notes} setNote={setNote} />
+              {!wizardMinimized && <NotesPanel nodes={notesNodes} notes={doc.notes} setNote={setNote} focusKey={focusKey && (alloc.has(focusKey) || ascAlloc.has(focusKey)) ? focusKey : null} focusName={focusKey ? tree.nodes.get(focusKey)?.name ?? null : null} />}
+              {!wizardMinimized && selectedClass == null && (
+                <div className="panel passives-locked-hint">
+                  Go back to <strong>Details</strong> and select a class to unlock passive allocation.
+                </div>
+              )}
             </>
           )}
-          {step === 2 && <SkillsStep skills={doc.skills} setSkills={setSkills} version={version} />}
-          {step === 3 && (
+          {!wizardMinimized && step === 2 && <SkillsStep skills={doc.skills} setSkills={setSkills} version={version} />}
+          {!wizardMinimized && step === 3 && (
             <InventoryStep
               inventory={doc.inventory}
               setInventory={setInventory}
               selectedAsc={selectedAsc}
             />
           )}
+          <Controls camera={cameraRef.current} onReset={resetView} />
         </>
       ) : (
         <>
-          <SearchPanel
-            query={query}
-            setQuery={setQuery}
-            results={results}
-            total={results.length}
-            diff={diff}
-            diffOn={diffOn}
-            onPick={pickSearch}
-            overrides={activeOverrides}
-          />
-          <VersionPanel
-            version={version}
-            setVersion={setVersion}
-            diffOn={diffOn}
-            setDiffOn={toggleDiff}
-            diff={diff}
-          />
+          <div className="side-col side-col--left">
+            <SearchPanel
+              query={query}
+              setQuery={setQuery}
+              results={results}
+              total={results.length}
+              diff={diff}
+              diffOn={diffOn}
+              onPick={pickSearch}
+              overrides={activeOverrides}
+            />
+            <Controls camera={cameraRef.current} onReset={resetView} />
+          </div>
+          <div className="side-col side-col--right">
+            <ClassPanel
+              classes={tree.classes}
+              selectedClass={selectedClass}
+              selectedAsc={selectedAsc}
+              newAscIds={newAscIds}
+              onSelectClass={selectClass}
+              onSelectAsc={selectAsc}
+              onNewBuild={enterPlanner}
+              onImport={triggerImport}
+              onEdit={editBuild}
+              canEdit={selectedClass != null || alloc.size > 0}
+            />
+            <VersionPanel
+              version={version}
+              setVersion={setVersion}
+              diffOn={diffOn}
+              setDiffOn={toggleDiff}
+              diff={diff}
+            />
+          </div>
           <BuildPanel
             hasClass={selectedClass != null}
-            mainUsed={alloc.size}
+            mainUsed={mainUsed}
             budget={baseBudget + bonus}
             bonus={bonus}
             ascUsed={ascUsed}
@@ -551,41 +658,27 @@ export default function App() {
             mode={mode}
             set1={setCounts[0]}
             set2={setCounts[1]}
-            swapMax={SWAP_MAX}
+            swapMax={ascAlloc.has(WEAPON_MASTER_KEY) ? SWAP_MAX_MASTER : SWAP_MAX}
             setMode={setMode}
             setBaseBudget={setBaseBudget}
             onClear={clearBuild}
           />
-          <ClassPanel
-            classes={tree.classes}
-            selectedClass={selectedClass}
-            selectedAsc={selectedAsc}
-            newAscIds={newAscIds}
-            onSelectClass={selectClass}
-            onSelectAsc={selectAsc}
-            onNewBuild={enterPlanner}
-            onImport={triggerImport}
-            onEdit={editBuild}
-            canEdit={selectedClass != null || alloc.size > 0}
-          />
           <button
             className="edge-toggle left"
             onClick={() => setShowLeft((v) => !v)}
-            aria-label="Toggle search and class panels"
+            aria-label="Toggle search panel"
           >
             {showLeft ? "‹" : "›"}
           </button>
           <button
             className="edge-toggle right"
             onClick={() => setShowRight((v) => !v)}
-            aria-label="Toggle version panel"
+            aria-label="Toggle version and class panels"
           >
             {showRight ? "›" : "‹"}
           </button>
         </>
       )}
-
-      <Controls camera={cameraRef.current} onReset={resetView} />
 
       <PobImportModal
         open={pobModalOpen}

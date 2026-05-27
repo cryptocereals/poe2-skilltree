@@ -6,13 +6,27 @@ interface Props {
   setStep: (s: number) => void;
   onExport: () => void;
   onExit: () => void;
+  minimized: boolean;
+  onToggleMinimize: () => void;
 }
 
-function PlannerWizard({ steps, step, setStep, onExport, onExit }: Props) {
+function PlannerWizard({ steps, step, setStep, onExport, onExit, minimized, onToggleMinimize }: Props) {
   return (
     <div className="panel wizard">
       <button className="wizard__exit" onClick={onExit} title="Exit planner">
         ✕
+      </button>
+
+      <button
+        className="wizard__minimize"
+        onClick={onToggleMinimize}
+        title={minimized ? "Expand panels" : "Collapse panels"}
+      >
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+          {minimized
+            ? <polyline points="6 9 12 15 18 9" />
+            : <polyline points="6 15 12 9 18 15" />}
+        </svg>
       </button>
 
       <div className="wizard__steps">
