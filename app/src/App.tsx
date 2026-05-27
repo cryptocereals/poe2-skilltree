@@ -9,6 +9,7 @@ import TreeCanvas, { type FocusTarget } from "./components/TreeCanvas";
 import SearchPanel from "./components/SearchPanel";
 import ClassPanel from "./components/ClassPanel";
 import VersionPanel from "./components/VersionPanel";
+import StatsPanel from "./components/StatsPanel";
 import BuildPanel from "./components/BuildPanel";
 import Controls from "./components/Controls";
 import HoverLayer, { type HoverHandle } from "./components/HoverLayer";
@@ -646,6 +647,12 @@ export default function App() {
               diffOn={diffOn}
               setDiffOn={toggleDiff}
               diff={diff}
+            />
+            <StatsPanel
+              tree={tree}
+              alloc={alloc}
+              ascAlloc={ascAlloc}
+              selectedClass={selectedClass}
             />
           </div>
           <BuildPanel

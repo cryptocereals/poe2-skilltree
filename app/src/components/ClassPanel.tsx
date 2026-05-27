@@ -1,4 +1,4 @@
-import { memo } from "react";
+import { memo, useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import type { ClassInfo } from "../types";
 
@@ -29,6 +29,13 @@ function ClassPanel({
   onEdit,
   canEdit,
 }: Props) {
+  const [open, setOpen] = useState(true);
+
+  // Auto-open when a class or ascendancy is selected so the user can see choices
+  useEffect(() => {
+    if (selectedClass != null || selectedAsc != null) setOpen(true);
+  }, [selectedClass, selectedAsc]);
+
   const cls = selectedClass != null ? classes[selectedClass] : null;
   const ascendancies = cls ? cls.ascendancies.filter((a) => a && a.name) : [];
 
@@ -52,46 +59,64 @@ function ClassPanel({
           </button>
         )}
       </div>
-      <div className="panel__title">Class · Ascendancy</div>
-      <div className="class-grid">
-        {classes.map((c, i) =>
-          isPlayable(c) ? (
-            <button
-              key={c.name}
-              className={"class-chip" + (selectedClass === i ? " active" : "")}
-              onClick={() => onSelectClass(selectedClass === i ? null : i)}
-            >
-              {c.name}
-            </button>
-          ) : null
-        )}
+
+      <div className="panel__title panel__title--toggle" onClick={() => setOpen((v) => !v)}>
+        Class · Ascendancy
+        <span className={"panel__chevron" + (open ? " open" : "")}>›</span>
       </div>
 
-      <AnimatePresence>
-        {ascendancies.length > 0 && (
+      <AnimatePresence initial={false}>
+        {open && (
           <motion.div
-            className="asc-row"
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
+            key="class-body"
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.22 }}
+            style={{ overflow: "hidden" }}
           >
-            {ascendancies.map((a) => {
-              const isNew = newAscIds.has(a.id);
-              return (
-                <div
-                  key={a.id}
-                  className={
-                    "asc-chip" +
-                    (selectedAsc === a.id ? " active" : "") +
-                    (isNew ? " new" : "")
-                  }
-                  onClick={() => onSelectAsc(selectedAsc === a.id ? null : a.id)}
+            <div className="class-grid">
+              {classes.map((c, i) =>
+                isPlayable(c) ? (
+                  <button
+                    key={c.name}
+                    className={"class-chip" + (selectedClass === i ? " active" : "")}
+                    onClick={() => onSelectClass(selectedClass === i ? null : i)}
+                  >
+                    {c.name}
+                  </button>
+                ) : null
+              )}
+            </div>
+
+            <AnimatePresence>
+              {ascendancies.length > 0 && (
+                <motion.div
+                  className="asc-row"
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "auto" }}
+                  exit={{ opacity: 0, height: 0 }}
                 >
-                  <span className="asc-chip__name">{a.name}</span>
-                  <span className="asc-chip__tag">{isNew ? "NEW IN 0.5" : a.id}</span>
-                </div>
-              );
-            })}
+                  {ascendancies.map((a) => {
+                    const isNew = newAscIds.has(a.id);
+                    return (
+                      <div
+                        key={a.id}
+                        className={
+                          "asc-chip" +
+                          (selectedAsc === a.id ? " active" : "") +
+                          (isNew ? " new" : "")
+                        }
+                        onClick={() => onSelectAsc(selectedAsc === a.id ? null : a.id)}
+                      >
+                        <span className="asc-chip__name">{a.name}</span>
+                        <span className="asc-chip__tag">{isNew ? "NEW IN 0.5" : a.id}</span>
+                      </div>
+                    );
+                  })}
+                </motion.div>
+              )}
+            </AnimatePresence>
           </motion.div>
         )}
       </AnimatePresence>
