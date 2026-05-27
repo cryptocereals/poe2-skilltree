@@ -24,11 +24,18 @@ function resolveGemId(name: string, idMap: Map<string, string>): string {
 /**
  * Resolve a full metadata gem ID back to its display name, or return the
  * value as-is if no match found.
+ * Handles three forms:
+ *   "Metadata/Items/Gems/SkillGemBonestorm" → full path (exported format)
+ *   "SkillGemBonestorm"                     → bare leaf id
+ *   "Bonestorm"                             → already a display name, returned as-is
  */
 function resolveGemName(id: string, nameMap: Map<string, string>): string {
-  if (!id.startsWith(GEM_PATH)) return id; // bare name or unknown format
-  const leaf = id.slice(GEM_PATH.length);
-  return nameMap.get(leaf) ?? id;
+  if (id.startsWith(GEM_PATH)) {
+    const leaf = id.slice(GEM_PATH.length);
+    return nameMap.get(leaf) ?? id;
+  }
+  // Try direct lookup as a bare leaf id (e.g. "SupportGemBrutalityOne")
+  return nameMap.get(id) ?? id;
 }
 
 export type LevelInterval = number | number[]; // e.g. 12 or [0, 100]
