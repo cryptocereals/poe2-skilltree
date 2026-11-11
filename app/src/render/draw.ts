@@ -1,7 +1,7 @@
 import type { Camera } from "../lib/camera";
-import type { AtlasSet } from "../lib/atlas";
+import type { AtlasSet } from "../features/tree/canvas/atlas";
 import type { ParsedTree, TreeNode, NodeKind, VersionDiff, NodeOverride } from "../types";
-import { DIFF_COLORS } from "../lib/diff";
+import { DIFF_COLORS } from "../features/tree/diff";
 
 const FRAME: Record<NodeKind, string | null> = {
   keystone: "frame:KeystoneFrameUnallocated",

@@ -83,7 +83,7 @@ function DetailsStep({
               onClick={() => onSelectAsc(selectedAsc === a.id ? null : a.id)}
             >
               <span className="asc-chip__name">{a.name}</span>
-              <span className="asc-chip__tag">{newAscIds.has(a.id) ? "NEW IN 0.5" : a.id}</span>
+              <span className="asc-chip__tag">{newAscIds.has(a.id) ? "NEW" : a.id}</span>
             </div>
           ))}
         </div>

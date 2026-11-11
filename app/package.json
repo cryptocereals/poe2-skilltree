@@ -9,7 +9,8 @@
     "dev": "vite",
     "prebuild": "npm run prepare-data",
     "build": "tsc -b && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "node --test scripts/prepare-tree-versions.test.mjs scripts/prepare-poe1-tree.test.mjs scripts/skill-tree-assets.test.mjs ../scripts/skill-tree/download.test.mjs ../scripts/skill-tree/download-poe1.test.mjs ../scripts/skill-tree/download-poe1-archive.test.mjs src/features/sharedTree/sharedTree.test.mjs src/features/sharedTree/allocation/graph.test.mjs src/features/sharedTree/stats/aggregateTreeStats.test.mjs src/features/tree/versionSelection.test.mjs src/features/tree/canvas/canvasCoordinates.test.mjs src/features/tree/canvas/atlasAssetUrl.test.mjs src/features/poe1/data/normalizeTree.test.mjs src/features/poe1/data/source.test.mjs src/features/poe1/allocation/model.test.mjs src/features/poe1/stats/summary.test.mjs src/features/poe1/diff.test.mjs src/features/workspace/navigation.test.mjs"
   },
   "dependencies": {
     "framer-motion": "^11.11.0",

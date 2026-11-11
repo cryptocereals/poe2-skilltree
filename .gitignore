@@ -1,0 +1,7 @@
+# Local Python and TypeScript build caches
+__pycache__/
+*.py[cod]
+*.tsbuildinfo
+
+# Local agent session telemetry
+/.github/context-mode/sessions/

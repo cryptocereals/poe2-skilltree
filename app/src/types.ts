@@ -176,11 +176,11 @@ export interface DiffEntry {
   newName?: string;
   oldStats?: string[];
   newStats?: string[];
-  // present for removed nodes (taken from 0.4 so we can ghost-render them)
+  // present for removed nodes (taken from the comparison tree for ghost rendering)
   ghost?: { x: number; y: number; name: string; kind: NodeKind };
 }
 
-// A node present in both versions whose position changed (0.4 → 0.5).
+// A node present in both compared versions whose position changed.
 export interface MovedEntry {
   key: string;
   name: string;

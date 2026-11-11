@@ -1,7 +1,7 @@
-# PoE2 Skill Tree Planner
+# PoE1 & PoE2 Skill Tree Planner
 
-An interactive passive skill tree planner for **Path of Exile 2**.
-Browse the tree, build your passive allocation, document your gem setup and gear, then export a shareable `.build` file.
+An interactive passive skill tree planner for **Path of Exile 1** and **Path of Exile 2**.
+Plan a full PoE2 build or allocate PoE1 passives with path previews and pruning.
 
 Live: **https://cryptocereals.github.io/poe2-skilltree/** *(if deployed via GitHub Pages)*
 
@@ -9,7 +9,12 @@ Live: **https://cryptocereals.github.io/poe2-skilltree/** *(if deployed via GitH
 
 ## Features
 
-- Interactive passive skill tree (versions 0.4 and 0.5)
+- Global PoE1 / PoE2 switch for the selected workspace
+- PoE1 passive allocation with path previews and branch pruning
+- PoE1 class and ascendancy allocation, node search/details, pan and zoom
+- Combined PoE1 version/ruleset dataset selection and cross-dataset comparison
+- Select the current tree or any available archived version
+- Optional passive-node comparison between any two available versions or PoE1 rulesets
 - Class and ascendancy selection
 - Weapon set switching (Set I / Set II)
 - Build planner wizard (Details → Passives → Skills → Inventory)
@@ -24,11 +29,22 @@ Live: **https://cryptocereals.github.io/poe2-skilltree/** *(if deployed via GitH
 
 ## How to use
 
+### Workspace navigation
+
+Use the header to switch between **PoE1** and **PoE2**. The selection applies to both workspace destinations. Use the sidebar to switch between **Skill Tree** and **Atlas Tree**. Atlas Tree remains a coming-soon placeholder because no atlas viewer is implemented yet.
+
+On the PoE1 **Skill Tree**, choose a version/ruleset dataset, then select a class or ascendancy. Click passives to allocate or remove them; disconnected branches are pruned. Allocate a notable in a cluster before choosing its mastery effect. The passive summary totals numeric base stats and shows chosen mastery effects verbatim; it does not simulate conditional or enemy effects, quest rewards, or build validity.
+
 ### Browsing the tree
 
-Open the app. Use the **Class Panel** on the right to pick a class.
+Open the app and choose **PoE1** or **PoE2** in the header.
+
+For PoE1, select a combined version/ruleset entry (for example, the current release with **Standard** or **Ruthless**) from **Tree dataset**. Comparison can use any other available dataset, including another ruleset from the same release. Hover a passive to preview its allocation path and see official stats/release changes; click to allocate or deallocate it. Click a mastery to choose one of its effects; canceling does not allocate it, and an allocated mastery can be changed, cleared, or removed. Touch users can tap once to inspect and tap again to allocate or open a mastery choice.
+
+For PoE2, use the **Class Panel** on the right to pick a class.
 Pan with left-click drag, zoom with the scroll wheel.
 Use the **Search** box on the left to find passives by name.
+Use **Tree version** to choose a tree; turn on **Compare with another version** to highlight its differences.
 
 ### Creating a build
 
@@ -127,6 +143,16 @@ Then open `http://localhost:5173`.
 
 ## Data sources
 
-Tree data is extracted from the game files.
+PoE1 tree JSON and sprite atlases are downloaded from the official [Grinding Gear Games skilltree-export repository](https://github.com/grindinggear/skilltree-export). Standard and Ruthless remain separate rulesets; the downloader archives the ten latest distinct `data.json` history revisions, including previews and letter releases. Historical JSON and version-scoped runtime atlases are stored under `data/poe1/versions/<snapshot>/` and `assets/poe1/versions/<snapshot>/`, so identical filenames from different snapshots cannot collide.
+
+PoE2 tree data is extracted from the game files and archived exports.
 Gem lists are sourced from [poe2db.tw](https://poe2db.tw).
 See `app/scripts/` for the data preparation scripts.
+Skill-tree sprite atlas metadata and images are paired in `assets/skill-tree/`.
+
+To download tree data:
+- Run the VS Code task **Download PoE2 Skill Tree Data** to fetch PoE2 archives.
+- Or run `node scripts/skill-tree/download.mjs` from the workspace root.
+- Run the VS Code task **Download PoE1 Skill Tree Data (Standard + Ruthless + Assets)**, or run `node scripts/skill-tree/download-poe1.mjs`. It downloads the current Standard/Ruthless export and the ten latest distinct `data.json` revisions; the preparation step publishes them in upstream history order as selectable/comparable snapshots offline.
+
+PoE2 archives are saved to `data/skill-tree/<version>.json`. PoE1 files are pinned to an upstream commit in `data/poe1/manifest.json`; valid local files are skipped on rerun.

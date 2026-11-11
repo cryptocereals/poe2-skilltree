@@ -1,0 +1,55 @@
+{
+  "repository": "https://github.com/grindinggear/skilltree-export",
+  "branch": "master",
+  "commit": "326858d90b229d5953f7670b6f2817acefd7bf5d",
+  "release": "3.27.0-preview",
+  "label": "3.27.0 preview",
+  "title": "3.27.0 preview",
+  "committedAt": "2025-10-29T23:08:05.000Z",
+  "historyOrder": 5,
+  "historyAnchorCommit": "8bd138b32ea2631455cac5935bfab089f826094f",
+  "historyPath": "data.json",
+  "trees": {
+    "standard": "data.json",
+    "ruthless": "ruthless.json"
+  },
+  "assetsDirectory": "assets/poe1/versions/3.27.0-preview",
+  "files": {
+    "data.json": {
+      "sha256": "266f0005c979c6c1d8568d1825ea64678a6371dd445a0beedbaf4333a9426f94",
+      "bytes": 5572668
+    },
+    "ruthless.json": {
+      "sha256": "61e67ef0fee4d62ef50f8c80e30f79af3e458f6406a9977147de85e80f11965c",
+      "bytes": 5563278
+    },
+    "assets/jewel-3.png": {
+      "sha256": "c2a3134f8e0ece177c46cfc531937038e4448cd4185a80243acb04d72bac7525",
+      "bytes": 68314
+    },
+    "assets/mastery-disabled-3.png": {
+      "sha256": "d7a1af472d3e9ce3dcea3c81282f41745209569d93ba77cd56f47fabc88c4790",
+      "bytes": 267333
+    },
+    "assets/mastery-active-selected-3.png": {
+      "sha256": "9f5676c2309845a06e1d9fc53f5cb027749592f1c716a8e0d2308ef462165d9b",
+      "bytes": 677584
+    },
+    "assets/frame-3.png": {
+      "sha256": "506b34053cde6616e3a2202970a7c387bc5df6daec2c9813eb09ee82f575cc63",
+      "bytes": 157350
+    },
+    "assets/skills-3.jpg": {
+      "sha256": "3a471a87dbb9ad50ad93bc5e5888ece0b0e1ae74bf7f897a36eb2db7117b3ceb",
+      "bytes": 710105
+    },
+    "assets/mastery-3.png": {
+      "sha256": "f7023bad564da32cd40f93019daa05d58872c3463c016c21a0a5083f17b1ab2c",
+      "bytes": 591313
+    },
+    "assets/skills-disabled-3.jpg": {
+      "sha256": "aa22cdddf434d5b930d550610f76d1c34cb64da118ca038c19d58f4511c2ee6f",
+      "bytes": 508505
+    }
+  }
+}

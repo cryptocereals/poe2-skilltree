@@ -1,0 +1,325 @@
+{
+  "repository": "https://github.com/grindinggear/skilltree-export",
+  "branch": "master",
+  "commit": "8bd138b32ea2631455cac5935bfab089f826094f",
+  "release": "3.29.1",
+  "trees": {
+    "standard": "data.json",
+    "ruthless": "ruthless.json"
+  },
+  "assetsDirectory": "assets/poe1",
+  "files": {
+    "data.json": {
+      "sha256": "7e9f755e33152129ebf36c2ebdad639c527e4ad70d274b1fefb860f30ca01122",
+      "bytes": 6666935
+    },
+    "ruthless.json": {
+      "sha256": "cedacd247611385a1fcc82959c73eb74b82a62e4c9875244dfa030947e65483b",
+      "bytes": 6657754
+    },
+    "assets/ascendancy-0.webp": {
+      "sha256": "6441f644ebee2f6a08adb3ee02b9a7e3dd9602d85527a8a444b9d76b32a04007",
+      "bytes": 81372
+    },
+    "assets/ascendancy-1.webp": {
+      "sha256": "2d387a985ed614487aac5384088d4b53ed24806152f546266c11e6f3771a1826",
+      "bytes": 181368
+    },
+    "assets/ascendancy-2.webp": {
+      "sha256": "1770ab7603bc26fe23319c259ff22da545ad79977592dab56c1a6a786a83a3f9",
+      "bytes": 303454
+    },
+    "assets/ascendancy-3.webp": {
+      "sha256": "966bde805fe33cddb49db94c7c5fc728a95648f0529f08d60357af9e3ae7857e",
+      "bytes": 455596
+    },
+    "assets/ascendancy-4.webp": {
+      "sha256": "ed64818696c4311a6d7088fe018b539be08c9dc1f4b15c4cd96b8a8d483c9ee3",
+      "bytes": 678748
+    },
+    "assets/background-0.png": {
+      "sha256": "0069a16e235b4a53b8b5ddecadc5dd66d83fa4af37827529ce2485b7989a06ef",
+      "bytes": 696
+    },
+    "assets/background-1.png": {
+      "sha256": "e1ec59938c04867b3d2eeeed0944f07df7ed95eebaaa1469f19b0c0118557003",
+      "bytes": 1836
+    },
+    "assets/background-2.png": {
+      "sha256": "3d3d13c1cc2767d98a85c939086e10fe069047da5d52edc76a2991561ebfb018",
+      "bytes": 4028
+    },
+    "assets/background-3.png": {
+      "sha256": "180ff1c42924d9989c3b4fa82bfa294c64fd1fa321516b0e3cb51f59bfb8e145",
+      "bytes": 7289
+    },
+    "assets/background-4.png": {
+      "sha256": "d4a153325bb6fc7419dc1e77ad75721aa5b6774d826bd227636a70ab529fb9aa",
+      "bytes": 13611
+    },
+    "assets/bloodline-0.webp": {
+      "sha256": "60ef98dfe11347c479d91a602eea9786dd435affa7d61a757794548c86a7b41e",
+      "bytes": 98664
+    },
+    "assets/bloodline-1.webp": {
+      "sha256": "9e902e682c51838de6edb1a6e6a4c3b12983e138d60c5bd0cd50b22daf47019b",
+      "bytes": 226376
+    },
+    "assets/bloodline-2.webp": {
+      "sha256": "70b27826ffbb0f4f70076124c1e2f56f9996ea7079b41e479d52d638f3eb7f13",
+      "bytes": 386398
+    },
+    "assets/bloodline-3.webp": {
+      "sha256": "2d604c68621109a18d04c934804a1a0cd5a7f7d0e56cbff54ea9a99e9921e6b8",
+      "bytes": 575250
+    },
+    "assets/bloodline-4.webp": {
+      "sha256": "b97866386a69f41d6b3cdce070dd324f79af28661bf01945671dcfe8b52e7620",
+      "bytes": 882890
+    },
+    "assets/frame-0.png": {
+      "sha256": "3d2e8d8743df1948ebf599e21fdbef7d12d52179ceb0cc4414827b1b47681f56",
+      "bytes": 21692
+    },
+    "assets/frame-1.png": {
+      "sha256": "f98f8ce36e9cf6ec64c5446cda0bbdfcb439a9b23259b97a9ee6fbf770d1f068",
+      "bytes": 54317
+    },
+    "assets/frame-2.png": {
+      "sha256": "2ba69d8075a5ac71d562623bb85588eb54b86b1f13b120349e52f5c0a11860f6",
+      "bytes": 100108
+    },
+    "assets/frame-3.png": {
+      "sha256": "506b34053cde6616e3a2202970a7c387bc5df6daec2c9813eb09ee82f575cc63",
+      "bytes": 157350
+    },
+    "assets/frame-4.png": {
+      "sha256": "bb997e7a1cc29d158bc6bdb2fc178494a961c04a90688ecfcbdf40febf037708",
+      "bytes": 255677
+    },
+    "assets/group-background-0.png": {
+      "sha256": "27be91d578a9f4b898dc808f795d6214522923fbc60f927517f2959336c7b248",
+      "bytes": 95739
+    },
+    "assets/group-background-1.png": {
+      "sha256": "4df4779c78a2b3af78efd25a041a6e137bf068d7a4ddb95ee5cd788e9a9ee191",
+      "bytes": 249990
+    },
+    "assets/group-background-2.png": {
+      "sha256": "1fb12486776d183b18674eadd30e262ea00ed8a3950a502f736faa8502001ecd",
+      "bytes": 470474
+    },
+    "assets/group-background-3.png": {
+      "sha256": "81346e855858cb6ea44b00bcb670f303a6547ff33de3027d81b1f301a3ad614b",
+      "bytes": 761230
+    },
+    "assets/group-background-4.png": {
+      "sha256": "cb7c84022d2e1b17cdf1d2ee8dd9bee188e168cee25c596f7d5330dabe96554d",
+      "bytes": 1255165
+    },
+    "assets/jewel-0.png": {
+      "sha256": "d4e50f45f693051437c6effdc20a9a924409a79e2d97ef97d3548b990c0260d5",
+      "bytes": 10742
+    },
+    "assets/jewel-1.png": {
+      "sha256": "2406411d982fad27c14f4483b1a477ee640955fb4c8b7f153b54456e7ad87d4b",
+      "bytes": 25344
+    },
+    "assets/jewel-2.png": {
+      "sha256": "3b27da0362eca22953ab6f2f363e650f394a549d6b68f241d4c0a307ea2f9275",
+      "bytes": 44438
+    },
+    "assets/jewel-3.png": {
+      "sha256": "c2a3134f8e0ece177c46cfc531937038e4448cd4185a80243acb04d72bac7525",
+      "bytes": 68314
+    },
+    "assets/jewel-4.png": {
+      "sha256": "1e59ca60ddde18177654e43dfccf6f2c431db4a93a7fa8448d81fac6a297c960",
+      "bytes": 109941
+    },
+    "assets/jewel-radius.png": {
+      "sha256": "84dfda13fd672dd02a56bb6d6a031ddcc079691c8a2c1a4002a3bb6c124d1b87",
+      "bytes": 1504987
+    },
+    "assets/line-0.png": {
+      "sha256": "5308783271be38ea500bb5cc791bdfcedc28d8399fb0b2dca1da3f3da04d5754",
+      "bytes": 28258
+    },
+    "assets/line-1.png": {
+      "sha256": "500f71a907a6d561ae6681c87fd57cabdac97ed391be2d7b0dad8d8fc3d72c7c",
+      "bytes": 64746
+    },
+    "assets/line-2.png": {
+      "sha256": "84cc992d950389e2977373b8878bc561bbadad6134f9f47ba458f7b2d0b8edd2",
+      "bytes": 112953
+    },
+    "assets/line-3.png": {
+      "sha256": "2fb268a4b7316b822d73660bb47fcfdccd4b1ca5c47df211a8301a1a2785d0b8",
+      "bytes": 175357
+    },
+    "assets/line-4.png": {
+      "sha256": "358d20ad977dc791597f0ec9d440d9bad9e3f174340c9b1531a8caf91a389056",
+      "bytes": 275253
+    },
+    "assets/mastery-0.png": {
+      "sha256": "2ea4ef9fb85d20f7679a101eb3d8a3f6f7112eccf37243a7ee9696023a2d6001",
+      "bytes": 87819
+    },
+    "assets/mastery-1.png": {
+      "sha256": "281811930d8e58a6964209178363229e83f7a101a51ba58ee5466f8460e9637f",
+      "bytes": 216879
+    },
+    "assets/mastery-2.png": {
+      "sha256": "6bb5c24dca32212c2c507baf97a6b0ffad39c65ec0db2a1bb50dc9f7343bb2e8",
+      "bytes": 407615
+    },
+    "assets/mastery-3.png": {
+      "sha256": "0fa21d63628baa980afaf5211f91b38e694e2030f8edfbe72e1c66a3bbbda9c9",
+      "bytes": 643944
+    },
+    "assets/mastery-4.png": {
+      "sha256": "ffaf99159ee8caac113720ec074c0e185452c33f8b6c914b70168ccecb26f12f",
+      "bytes": 1063585
+    },
+    "assets/mastery-active-effect-0.png": {
+      "sha256": "a8c2235180c18a3214182b944b9013b4a1a4fac8e0475b3a231c68494b774904",
+      "bytes": 640736
+    },
+    "assets/mastery-active-effect-1.png": {
+      "sha256": "70f67738798ea50f784558ce12b640b02fed6f57eec5316b9b645a47dfa80989",
+      "bytes": 1622504
+    },
+    "assets/mastery-active-effect-2.png": {
+      "sha256": "068adba64bcf5d0e1db04158ea942cc312a5a832d5826b2c7799b44b8d7d2caa",
+      "bytes": 2983061
+    },
+    "assets/mastery-active-effect-3.png": {
+      "sha256": "4d0ddae0a9e85eb7bf9a541d6d8898c57d057fd82addf39f6360d86a2d82eace",
+      "bytes": 4714330
+    },
+    "assets/mastery-active-effect-4.png": {
+      "sha256": "d538d4fabb1d2d5b5db66a90c9ff219fbb0884925834e10a30f7874f002c15f6",
+      "bytes": 7554143
+    },
+    "assets/mastery-active-selected-0.png": {
+      "sha256": "9c4f5bf1201d9045dc12d238bca252a5e09f93f4785d61a6042aabbe8d2b198c",
+      "bytes": 89286
+    },
+    "assets/mastery-active-selected-1.png": {
+      "sha256": "b4f41e1f2c45057bcf38cd350e147176c829141912833effe23126b495f839f1",
+      "bytes": 251131
+    },
+    "assets/mastery-active-selected-2.png": {
+      "sha256": "0484e9436cc7921d17472904a1ec6c5174460f41a6ab87c5a19badc4e0506402",
+      "bytes": 468916
+    },
+    "assets/mastery-active-selected-3.png": {
+      "sha256": "8357b76163221de4a2f6f5d07f2bf5f0fe6552b54c0e02a86516e66b184f8356",
+      "bytes": 732063
+    },
+    "assets/mastery-active-selected-4.png": {
+      "sha256": "6e0eacf753138598f62fdd3a8aa1d7d467ae46441e29794962df81e9ceeab105",
+      "bytes": 1198880
+    },
+    "assets/mastery-connected-0.png": {
+      "sha256": "4010f4210531ac1a30648aca8f738ae172233cbf873cdaf037efb8728f5bc5d4",
+      "bytes": 46801
+    },
+    "assets/mastery-connected-1.png": {
+      "sha256": "722bda30ed2c6746a226f8d1fb5af0fb99cf62f57d1196d6e369256ee54cbf90",
+      "bytes": 116000
+    },
+    "assets/mastery-connected-2.png": {
+      "sha256": "76ca3928a7d3d6a1cb78d3e03efc89e3103e0b98cf4a15426e1df8680b408cdc",
+      "bytes": 213308
+    },
+    "assets/mastery-connected-3.png": {
+      "sha256": "a960d7b4ae460178d3e7476310272cdbf37ac096c4ea2eeb9d4b5e379883fea6",
+      "bytes": 332011
+    },
+    "assets/mastery-connected-4.png": {
+      "sha256": "1e8fda8ddb33dab77d31a0ec5bc8908652d9f125e7c8e50fb418d88d91d1c565",
+      "bytes": 540943
+    },
+    "assets/mastery-disabled-0.png": {
+      "sha256": "7c6522d7625b845997dd7b2188eeb46a54d21d73bc8198900cc9e0785f1d12cc",
+      "bytes": 43820
+    },
+    "assets/mastery-disabled-1.png": {
+      "sha256": "69d740b968dd349eea3f5f6e090bb4efbb8169e8352048efac0a33259c283bc2",
+      "bytes": 112148
+    },
+    "assets/mastery-disabled-2.png": {
+      "sha256": "46e105fd86ccd3f27d8a317284c1de52459b2369795168c53530c2a6e3dd9b08",
+      "bytes": 208054
+    },
+    "assets/mastery-disabled-3.png": {
+      "sha256": "f2c47bcd23177f502b4ef271baca072e5ef3bd21e32e8e4279110e7d5f9bf63c",
+      "bytes": 314284
+    },
+    "assets/mastery-disabled-4.png": {
+      "sha256": "4a5506956f8201ba42898cdcf3910cb61e49e46d26a4e7b289ab9adf1a1ee52f",
+      "bytes": 492501
+    },
+    "assets/skills-0.jpg": {
+      "sha256": "15892de7129c9a09a3d2d756c234289a0dd2afc313ebe22a629c093d51b795c2",
+      "bytes": 96218
+    },
+    "assets/skills-1.jpg": {
+      "sha256": "591e551addb4b57cb28ec72aeb7c8d9f71094ef28d5412fd8de10efd46b022df",
+      "bytes": 254023
+    },
+    "assets/skills-2.jpg": {
+      "sha256": "75f00911c18862a984a81a0fa92f6c1cccdaa49c4feeae15859ef6beb2f93b2a",
+      "bytes": 483812
+    },
+    "assets/skills-3.jpg": {
+      "sha256": "840d0b3a701c3c129e9fc8d82b688df461490624d435902d4f1cf1b28cd531e3",
+      "bytes": 756154
+    },
+    "assets/skills-4.jpg": {
+      "sha256": "fe7e0b5fc4174e2b7e0b55a518789680b314d67eb285c2e39553a208042fc385",
+      "bytes": 1231813
+    },
+    "assets/skills-disabled-0.jpg": {
+      "sha256": "1404a236bc72c4753a9fb1e78dd312f989546d02abff668c1b054e8246649f08",
+      "bytes": 68348
+    },
+    "assets/skills-disabled-1.jpg": {
+      "sha256": "f49d47d1943909f48d02c3ceec662a04b48806f7e2d45a86891d1478c97804b3",
+      "bytes": 180890
+    },
+    "assets/skills-disabled-2.jpg": {
+      "sha256": "7ad406eb5979db08ea511c0ab6369a92c3630f33316b52fff7ed7a474550e861",
+      "bytes": 346217
+    },
+    "assets/skills-disabled-3.jpg": {
+      "sha256": "28a5200d347eb488ed6a57a8e3b51c61716ec9fbb28bd776030cb3c286ec898a",
+      "bytes": 541401
+    },
+    "assets/skills-disabled-4.jpg": {
+      "sha256": "dc18fd7d9b2c5a867a229a8d9247cc64bfcac96b3f3baba338137a44fa2dca9c",
+      "bytes": 884715
+    },
+    "assets/tattoo-active-effect-0.png": {
+      "sha256": "97f24d05bfa363dc6084988bfd85293b5de3158f171761055fcf439df9209c66",
+      "bytes": 71711
+    },
+    "assets/tattoo-active-effect-1.png": {
+      "sha256": "86d229776d300d57df0ee9fa839e1ca6326bb417b8d5521da95dd88d80255b09",
+      "bytes": 188487
+    },
+    "assets/tattoo-active-effect-2.png": {
+      "sha256": "818d17d9f898135484dba1fd7bdd3b3dcc7a8e4de09eaa594b6f2e0cecca9b45",
+      "bytes": 353052
+    },
+    "assets/tattoo-active-effect-3.png": {
+      "sha256": "425f54aac33e00faabe410c732757596c4e88955313fb994c6cc2d857e235149",
+      "bytes": 561094
+    },
+    "assets/tattoo-active-effect-4.png": {
+      "sha256": "81d9a652eb487875d5f3e10be2ee9e31dbc1a88d2d90debefd8f104d96a5d469",
+      "bytes": 904733
+    }
+  }
+}

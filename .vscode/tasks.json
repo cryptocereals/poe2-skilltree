@@ -1,0 +1,34 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Open Skilltree",
+      "type": "npm",
+      "script": "dev",
+      "path": "app",
+      "args": ["--open"],
+      "isBackground": true,
+      "problemMatcher": [],
+      "runOptions": { "runOn": "folderOpen" },
+      "presentation": { "panel": "dedicated" }
+    },
+    {
+      "label": "Download PoE2 Skill Tree Data",
+      "type": "process",
+      "command": "node",
+      "args": ["scripts/skill-tree/download.mjs"],
+      "options": { "cwd": "${workspaceFolder}" },
+      "problemMatcher": [],
+      "presentation": { "panel": "dedicated" }
+    },
+    {
+      "label": "Download PoE1 Skill Tree Data (Standard + Ruthless + Assets)",
+      "type": "process",
+      "command": "node",
+      "args": ["scripts/skill-tree/download-poe1.mjs"],
+      "options": { "cwd": "${workspaceFolder}" },
+      "problemMatcher": [],
+      "presentation": { "panel": "dedicated" }
+    }
+  ]
+}

@@ -1,5 +1,6 @@
 import { memo } from "react";
 import type { Tag } from "../lib/buildState";
+import TreeFooterBar from "../features/sharedTree/components/TreeFooterBar";
 
 interface Props {
   hasClass: boolean;
@@ -33,7 +34,7 @@ function BuildPanel({
   onClear,
 }: Props) {
   return (
-    <div className="panel build">
+    <TreeFooterBar className="build">
       <div className="build__stat">
         <span className="build__label">Passives</span>
         <span className={"build__val" + (mainUsed > budget ? " over" : "")}>
@@ -105,7 +106,7 @@ function BuildPanel({
           <path d="M3 3v5h5" />
         </svg>
       </button>
-    </div>
+    </TreeFooterBar>
   );
 }
 

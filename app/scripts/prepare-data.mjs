@@ -1,38 +1,30 @@
 #!/usr/bin/env node
 // Cross-platform replacement for prepare-data.sh
-import { existsSync, mkdirSync, copyFileSync, readdirSync, writeFileSync } from "fs";
+import { existsSync, mkdirSync, writeFileSync } from "fs";
 import { execSync } from "child_process";
 import { join, dirname } from "path";
 import { fileURLToPath } from "url";
 import https from "https";
+import { copyAssets } from "./copy-assets.mjs";
+import { preparePoe1Tree } from "./prepare-poe1-tree.mjs";
+import { prepareTreeVersions } from "./prepare-tree-versions.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = join(__dirname, "..", "..");
 const pub = join(__dirname, "..", "public");
-const V04_COMMIT = process.env.V04_COMMIT || "859f2b1";
 const AC_URL =
     process.env.AC_URL ||
     "https://cdn.poe2db.tw/json/autocompletecb_us.00e8df2683036f13.json";
 
 mkdirSync(join(pub, "data"), { recursive: true });
-mkdirSync(join(pub, "assets"), { recursive: true });
 
-// Copy assets
-for (const f of readdirSync(join(root, "assets"))) {
-    copyFileSync(join(root, "assets", f), join(pub, "assets", f));
-}
+// Preserve nested asset sets and remove flat skill-tree atlas copies from older builds.
+copyAssets(join(root, "assets"), join(pub, "assets"), {
+    excludeDirectories: ["poe1"],
+});
 
-// Copy current data
-copyFileSync(join(root, "data.json"), join(pub, "data", "data-0.5.json"));
-
-// Extract v0.4 data from git history
-const v04Path = join(pub, "data", "data-0.4.json");
-try {
-    const out = execSync(`git -C "${root}" show ${V04_COMMIT}:data.json`, { maxBuffer: 64 * 1024 * 1024 });
-    writeFileSync(v04Path, out);
-} catch (e) {
-    console.error("Could not extract v0.4 data from git history:", e.message);
-}
+prepareTreeVersions({ root, publicDirectory: pub });
+preparePoe1Tree({ root, publicDirectory: pub });
 
 // Fetch poe2db autocomplete if not already present
 const podbPath = join(pub, "data", "poe2db.json");
